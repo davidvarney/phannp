@@ -21,7 +21,7 @@ use Phannp\Resources\SMS;
 
 class Client
 {
-    private const BASE_URL = 'https://dash.stannp.com/api/v1/';
+    private const BASE_URL = 'https://api-us1.stannp.com/api/v1/';
     
     private string $apiKey;
     private GuzzleClient $httpClient;
