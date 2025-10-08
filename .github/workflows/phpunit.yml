@@ -3,24 +3,29 @@
     on: [push]
 
     jobs:
-      phpunit:
-        name: Run PHPUnit Tests
+      build:
         runs-on: ubuntu-latest
 
         steps:
-          - uses: actions/checkout@v4 # Checkout the repository code
+          - uses: actions/checkout@v4
 
-          - name: Setup PHP
+          - name: Set up PHP
             uses: shivammathur/setup-php@v2
             with:
-              php-version: '8.2' # Specify your desired PHP version
-              #extensions: mbstring, pdo_mysql # Add necessary PHP extensions
-              ini-values: memory_limit=-1 # Set PHP INI values as needed
+              php-version: '8.2' # Adjust to your PHP version
+              extensions: xdebug # Required for coverage generation
 
-          - name: Install Composer dependencies
-            run: composer install --no-interaction --no-progress --prefer-dist
+          - name: Install dependencies
+            run: composer install --no-interaction --prefer-dist
 
-          - name: Run PHPUnit
-            run: vendor/bin/phpunit # Execute PHPUnit tests
-            # Optionally, you can specify a config file:
-            # run: vendor/bin/phpunit --configuration phpunit.xml
+          - name: Run PHPUnit and generate coverage report
+            run: vendor/bin/phpunit --coverage-clover clover.xml
+
+          - name: Create and push coverage badge
+            uses: timkrase/phpunit-coverage-badge@v1
+            with:
+              report: clover.xml
+              report_type: clover
+              coverage_badge_path: badge.svg
+              push_badge: true
+              commit_message: Update code coverage badge
