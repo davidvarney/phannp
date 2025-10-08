@@ -22,7 +22,7 @@
             run: vendor/bin/phpunit --coverage-clover clover.xml
 
           - name: Create and push coverage badge
-            uses: timkrase/phpunit-coverage-badge@v1
+            uses: timkrase/phpunit-coverage-badge@v1.2.1
             with:
               report: clover.xml
               report_type: clover
