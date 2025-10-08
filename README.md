@@ -258,3 +258,44 @@ try {
 ## License
 
 MIT
+
+## Testing
+
+This repository includes a PHPUnit test suite that exercises the `Phannp\Client` and every resource under `src/Resources`.
+
+What the tests cover
+- Each resource class has a corresponding test in `tests/Resources/` that verifies the public methods delegate to the client and return the parsed API response.
+- `tests/ClientTest.php` ensures the `Client` can send GET/POST/PUT/DELETE requests and that the resource properties (e.g. `$client->postcards`) are correctly instantiated.
+- Tests are isolated from the network by using Guzzle's `MockHandler`, so no real API calls or API keys are required.
+
+How the tests work
+- `tests/TestCase.php` provides a `makeClient(array $responses = [], array $options = [])` helper. It builds a `Phannp\Client` configured with a Guzzle `MockHandler` preloaded with the responses you provide.
+- Each test queues one or more `GuzzleHttp\Psr7\Response` objects. When the SDK makes an HTTP request, the MockHandler returns the next queued response.
+
+Run tests locally
+
+1. Install dependencies (from the project root):
+
+```bash
+composer install
+```
+
+2. Run the test suite with the vendor PHPUnit binary:
+
+```bash
+./vendor/bin/phpunit --configuration phpunit.xml.dist
+```
+
+Run an individual test file:
+
+```bash
+./vendor/bin/phpunit tests/Resources/PostcardsTest.php
+```
+
+Continuous Integration
+
+The tests are self-contained and suitable for CI. A simple GitHub Actions workflow should install composer dependencies and run `./vendor/bin/phpunit --configuration phpunit.xml.dist`.
+
+Extending the tests
+- To assert the exact request URI/method or headers, add a middleware to the Guzzle handler stack in `tests/TestCase.php` and capture the request objects for assertions.
+- Add negative/error cases by queuing responses with non-2xx status codes and asserting `Phannp\Exceptions\ApiException` is thrown.
