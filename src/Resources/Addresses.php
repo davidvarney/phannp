@@ -8,7 +8,7 @@ class Addresses extends Resource
     {
         return $this->client->post('addresses/validate', $data);
     }
-    
+
     public function autocomplete(string $postcode): array
     {
         return $this->client->get('addresses/autocomplete', ['postcode' => $postcode]);

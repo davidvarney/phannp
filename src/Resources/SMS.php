@@ -8,12 +8,12 @@ class SMS extends Resource
     {
         return $this->client->post('sms/send', $data);
     }
-    
+
     public function get(int $id): array
     {
         return $this->client->get("sms/get/{$id}");
     }
-    
+
     public function list(array $params = []): array
     {
         return $this->client->get('sms/list', $params);

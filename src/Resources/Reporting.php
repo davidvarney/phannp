@@ -8,7 +8,7 @@ class Reporting extends Resource
     {
         return $this->client->get('reporting/stats', $params);
     }
-    
+
     public function getCampaignStats(int $campaignId): array
     {
         return $this->client->get("reporting/campaign/{$campaignId}");
