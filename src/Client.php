@@ -22,10 +22,10 @@ use Phannp\Resources\SMS;
 class Client
 {
     private const BASE_URL = 'https://api-us1.stannp.com/api/v1/';
-    
+
     private string $apiKey;
     private GuzzleClient $httpClient;
-    
+
     public Postcards $postcards;
     public Letters $letters;
     public Recipients $recipients;
@@ -39,11 +39,11 @@ class Client
     public Addresses $addresses;
     public Tools $tools;
     public SMS $sms;
-    
+
     public function __construct(string $apiKey, array $httpOptions = [])
     {
         $this->apiKey = $apiKey;
-        
+
         $defaultOptions = [
             'base_uri' => self::BASE_URL,
             'headers' => [
@@ -52,9 +52,9 @@ class Client
             ],
             'timeout' => 30,
         ];
-        
+
         $this->httpClient = new GuzzleClient(array_merge($defaultOptions, $httpOptions));
-        
+
         $this->postcards = new Postcards($this);
         $this->letters = new Letters($this);
         $this->recipients = new Recipients($this);
@@ -69,33 +69,33 @@ class Client
         $this->tools = new Tools($this);
         $this->sms = new SMS($this);
     }
-    
+
     public function get(string $endpoint, array $params = []): array
     {
         return $this->request('GET', $endpoint, ['query' => $this->addApiKey($params)]);
     }
-    
+
     public function post(string $endpoint, array $data = []): array
     {
         return $this->request('POST', $endpoint, ['form_params' => $this->addApiKey($data)]);
     }
-    
+
     public function put(string $endpoint, array $data = []): array
     {
         return $this->request('PUT', $endpoint, ['form_params' => $this->addApiKey($data)]);
     }
-    
+
     public function delete(string $endpoint, array $params = []): array
     {
         return $this->request('DELETE', $endpoint, ['query' => $this->addApiKey($params)]);
     }
-    
+
     private function request(string $method, string $endpoint, array $options = []): array
     {
         try {
             $response = $this->httpClient->request($method, $endpoint, $options);
             $body = (string) $response->getBody();
-            
+
             return json_decode($body, true) ?? [];
         } catch (GuzzleException $e) {
             throw new ApiException(
@@ -105,7 +105,7 @@ class Client
             );
         }
     }
-    
+
     private function addApiKey(array $data): array
     {
         return array_merge(['api_key' => $this->apiKey], $data);

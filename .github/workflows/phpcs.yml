@@ -1,0 +1,29 @@
+name: PHPCS Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  phpcs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2' # Specify your desired PHP version
+          extensions: mbstring, xml, ctype, iconv, pdo_sqlite
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Run PHPCS
+        run: vendor/bin/phpcs --standard=PSR12 src/ # Adjust path and standard as needed

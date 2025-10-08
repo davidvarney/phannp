@@ -1,0 +1,26 @@
+    name: PHPUnit Tests
+
+    on: [push]
+
+    jobs:
+      phpunit:
+        name: Run PHPUnit Tests
+        runs-on: ubuntu-latest
+
+        steps:
+          - uses: actions/checkout@v4 # Checkout the repository code
+
+          - name: Setup PHP
+            uses: shivammathur/setup-php@v2
+            with:
+              php-version: '8.2' # Specify your desired PHP version
+              #extensions: mbstring, pdo_mysql # Add necessary PHP extensions
+              ini-values: memory_limit=-1 # Set PHP INI values as needed
+
+          - name: Install Composer dependencies
+            run: composer install --no-interaction --no-progress --prefer-dist
+
+          - name: Run PHPUnit
+            run: vendor/bin/phpunit # Execute PHPUnit tests
+            # Optionally, you can specify a config file:
+            # run: vendor/bin/phpunit --configuration phpunit.xml

@@ -8,12 +8,12 @@ class Tools extends Resource
     {
         return $this->client->get('countries/list');
     }
-    
+
     public function getRegions(string $countryCode): array
     {
         return $this->client->get('regions/list', ['country' => $countryCode]);
     }
-    
+
     public function getPricing(): array
     {
         return $this->client->get('pricing');

@@ -8,7 +8,7 @@ class Events extends Resource
     {
         return $this->client->get('events/list', $params);
     }
-    
+
     public function get(int $id): array
     {
         return $this->client->get("events/get/{$id}");
