@@ -1,0 +1,31 @@
+{
+    "name": "davidvarney/phannp",
+    "description": "PHP SDK for the Stannp Direct Mail API",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["stannp", "api", "direct mail", "postcards", "letters", "sms"],
+    "authors": [
+        {
+            "name": "David Varney"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0|^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Phannp\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Phannp\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
