@@ -4,6 +4,9 @@ namespace Phannp\Resources;
 
 class Tools extends Resource
 {
+    /**
+     * @todo These are NOT correct endpoints - need to confirm with Stannp
+     */
     public function getCountries(): array
     {
         return $this->client->get('countries/list');
