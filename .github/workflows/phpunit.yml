@@ -1,41 +1,29 @@
-    name: PHPUnit Tests
+name: phpunit
 
-    on: [push]
+on: [push]
 
-    permissions:
-      contents: read
-      security-events: write
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
 
-    jobs:
-      build:
-        runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-        steps:
-          - uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
 
-          - name: Set up PHP
-            uses: shivammathur/setup-php@v2
-            with:
-              php-version: '8.2' # Adjust to your PHP version
-              extensions: xdebug # Required for coverage generation
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
 
-          - name: Install dependencies
-            run: composer install --no-interaction --prefer-dist
+      - name: Run PHPUnit
+        run: ./vendor/bin/phpunit --configuration phpunit.xml.dist
 
-          - name: Run PHPUnit and generate coverage report
-            run: vendor/bin/phpunit --coverage-clover clover.xml
-
-          - name: Make code coverage badge
-            uses: timkrase/phpunit-coverage-badge@v1.2.1
-            with:
-              coverage_badge_path: output/coverage.svg
-              push_badge: false
-
-          - name: Git push to image-data branch
-            uses: peaceiris/actions-gh-pages@v3
-            with:
-              publish_dir: ./output
-              publish_branch: image-data
-              github_token: ${{ secrets.GITHUB_TOKEN }}
-              user_name: 'github-actions[bot]'
-              user_email: 'github-actions[bot]@users.noreply.github.com'
+      - name: Upload test logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpunit-logs
+          path: ./tests

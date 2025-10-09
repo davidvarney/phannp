@@ -1,5 +1,7 @@
 # Phannp
 
+![PHPUnit](https://github.com/davidvarney/phannp/actions/workflows/phpunit.yml/badge.svg)
+
 A modern PHP SDK for the Stannp Direct Mail API.
 
 ## Installation
