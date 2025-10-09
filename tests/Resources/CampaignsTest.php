@@ -453,9 +453,9 @@ class CampaignsTest extends TestCase
 
             // When sending resources, filenames may not be present; ensure bodies are present and content_type exists
             $foundNames = array_column($parts, 'name');
-            $this->assertContains('file', $foundNames);
-            $this->assertContains('front', $foundNames);
-            $this->assertContains('back', $foundNames);
+            $this->assertTrue(in_array('file', $foundNames, true), 'Expected part "file" not found');
+            $this->assertTrue(in_array('front', $foundNames, true), 'Expected part "front" not found');
+            $this->assertTrue(in_array('back', $foundNames, true), 'Expected part "back" not found');
 
             foreach ($parts as $p) {
                 if (in_array($p['name'], ['file','front','back'], true)) {

@@ -243,7 +243,7 @@ class Campaigns extends Resource
      * @throws \Phannp\Exceptions\ApiException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function availableDates(string $start = null, string $end = null): array
+    public function availableDates(?string $start = null, ?string $end = null): array
     {
         // Validate provided date strings (if any) to be Y-m-d.
         if ($start !== null) {

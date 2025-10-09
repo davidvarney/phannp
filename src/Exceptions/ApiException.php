@@ -12,7 +12,7 @@ class ApiException extends PhannpException
     public function __construct(
         string $message = '',
         int $code = 0,
-        \Throwable $previous = null,
+        ?\Throwable $previous = null,
         ?int $statusCode = null,
         ?string $responseBody = null
     ) {
@@ -33,7 +33,7 @@ class ApiException extends PhannpException
 
     public static function fromResponse(
         string $message,
-        \Throwable $previous = null,
+        ?\Throwable $previous = null,
         ?ResponseInterface $response = null
     ): self {
         $status = null;

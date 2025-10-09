@@ -20,7 +20,7 @@ class Files extends Resource
      * @return array
      * @throws \Phannp\Exceptions\ApiException on HTTP or API errors
      */
-    public function upload($file, int $folder_id = null): array
+    public function upload($file, ?int $folder_id = null): array
     {
         $data = ['file' => $file];
         if ($folder_id !== null) {
