@@ -53,7 +53,10 @@ class Addresses extends Resource
                 if (!preg_match('/^[A-Za-z]{2}$/', $value) || !Countries::isValid($value)) {
                     $allowed = Countries::allowedCodes();
                     $allowedSnippet = 'use "' . implode('" or "', $allowed) . '"';
-                    throw new PhannpException('Parameter "country" must be a valid ISO 3166-1 alpha-2 country code. Stannp currently accepts only ' . implode(', ', $allowed) . ' (' . $allowedSnippet . ').');
+                    throw new PhannpException(
+                        'Parameter "country" must be a valid ISO 3166-1 alpha-2 country code. Stannp currently
+                        accepts only ' . implode(', ', $allowed) . ' (' . $allowedSnippet . ').'
+                    );
                 }
             }
 
