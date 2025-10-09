@@ -3,28 +3,20 @@ name: PHPUnit
 on: [push]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2' # Or your desired PHP version
-        extensions: xdebug # Required for code coverage
-        ini-values: memory_limit=-1 # Adjust as needed
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2' # Or your desired PHP version
+          extensions: mbstring, xml, pdo_mysql # Add necessary extensions
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      - name: Install Composer Dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
 
-    - name: Run PHPUnit tests with coverage
-      run: vendor/bin/phpunit --coverage-clover clover.xml
-
-    - name: Upload coverage to Codecov (Optional)
-      uses: codecov/codecov-action@v4
-      with:
-        files: ./clover.xml # Path to your generated Clover XML report
-        verbose: true # Optional: enable verbose output for debugging
+      - name: Run PHPUnit Tests
+        run: ./vendor/bin/phpunit
