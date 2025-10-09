@@ -64,4 +64,95 @@ class FilesTest extends TestCase
             throw $e;
         }
     }
+
+    public function testMultipartUploadSendsFileContents()
+    {
+        $body = ['ok' => true];
+
+        // create a temp file with extension and known contents
+        $tmp = tempnam(sys_get_temp_dir(), 'phannp_test_') . '.txt';
+        file_put_contents($tmp, "hello-multipart");
+
+        [$client, $getHistory] = $this->makeClientWithHistoryPair([
+            new Response(200, [], json_encode($body)),
+        ]);
+
+        try {
+            $this->assertSame($body, $client->files->upload($tmp));
+
+            $history = $getHistory();
+            $this->assertCount(1, $history);
+            $request = $history[0]['request'];
+
+            // Ensure the request used multipart/form-data
+            $contentType = $request->getHeaderLine('Content-Type');
+            $this->assertStringContainsString('multipart/form-data', $contentType);
+
+            $parts = $this->parseMultipartBody($request);
+
+            // Find the 'file' part and ensure it contains our contents
+            $found = false;
+            foreach ($parts as $p) {
+                if ($p['name'] === 'file') {
+                    $found = true;
+                    $this->assertStringContainsString('hello-multipart', $p['body']);
+                    // the parser exposes filename when present
+                    $this->assertNotNull($p['filename']);
+                    $this->assertSame(basename($tmp), $p['filename']);
+                    // content type should be present and include text/plain
+                    $this->assertNotNull($p['content_type']);
+                    $this->assertStringContainsString('text/plain', strtolower($p['content_type']));
+                }
+            }
+
+            $this->assertTrue($found, 'Expected multipart part named "file" not found');
+        } finally {
+            // cleanup
+            @unlink($tmp);
+        }
+    }
+
+    public function testMultipartUploadWithResource()
+    {
+        $body = ['ok' => true];
+
+        $tmp = tempnam(sys_get_temp_dir(), 'phannp_test_') . '.txt';
+        file_put_contents($tmp, "resource-contents");
+
+        $f = fopen($tmp, 'r');
+
+        [$client, $getHistory] = $this->makeClientWithHistoryPair([
+            new Response(200, [], json_encode($body)),
+        ]);
+
+        try {
+            $this->assertSame($body, $client->files->upload($f));
+
+            $history = $getHistory();
+            $this->assertCount(1, $history);
+            $request = $history[0]['request'];
+
+            $this->assertStringContainsString('multipart/form-data', $request->getHeaderLine('Content-Type'));
+
+            $parts = $this->parseMultipartBody($request);
+
+            $found = false;
+            foreach ($parts as $p) {
+                if ($p['name'] === 'file') {
+                    $found = true;
+                    $this->assertStringContainsString('resource-contents', $p['body']);
+                    // allow either null filename or basename
+                    if ($p['filename'] !== null) {
+                        $this->assertSame(basename($tmp), $p['filename']);
+                    }
+                    $this->assertNotNull($p['content_type']);
+                }
+            }
+
+            $this->assertTrue($found, 'Expected multipart part named "file" not found');
+        } finally {
+            @fclose($f);
+            @unlink($tmp);
+        }
+    }
 }

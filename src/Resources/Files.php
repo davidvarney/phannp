@@ -15,12 +15,12 @@ class Files extends Resource
      *
      * @link https://www.stannp.com/us/direct-mail-api/files#uploadFile
      *
-     * @param string $file       The file path to upload
+     * @param string|resource $file The file path to upload or a resource
      * @param int|null $folder_id Optional folder ID to upload the file into
      * @return array
      * @throws \Phannp\Exceptions\ApiException on HTTP or API errors
      */
-    public function upload(string $file, int $folder_id = null): array
+    public function upload($file, int $folder_id = null): array
     {
         $data = ['file' => $file];
         if ($folder_id !== null) {
