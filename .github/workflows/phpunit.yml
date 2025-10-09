@@ -14,17 +14,11 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.2' # Or your desired PHP version
-        extensions: xdebug # Required for code coverage
+        #extensions: xdebug # Required for code coverage
         ini-values: memory_limit=-1 # Adjust as needed
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
     - name: Run PHPUnit tests with coverage
-      run: vendor/bin/phpunit --coverage-clover clover.xml
-
-    - name: Upload coverage to Codecov (Optional)
-      uses: codecov/codecov-action@v4
-      with:
-        files: ./clover.xml # Path to your generated Clover XML report
-        verbose: true # Optional: enable verbose output for debugging
+      run: vendor/bin/phpunit
