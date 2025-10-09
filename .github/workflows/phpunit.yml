@@ -21,12 +21,17 @@
           - name: Run PHPUnit and generate coverage report
             run: vendor/bin/phpunit --coverage-clover clover.xml
 
-          - name: Create and push coverage badge
+          - name: Make code coverage badge
             uses: timkrase/phpunit-coverage-badge@v1.2.1
             with:
+              coverage_badge_path: output/coverage.svg
+              push_badge: false
+
+          - name: Git push to image-data branch
+            uses: peaceiris/actions-gh-pages@v3
+            with:
+              publish_dir: ./output
+              publish_branch: image-data
               github_token: ${{ secrets.GITHUB_TOKEN }}
-              report: clover.xml
-              report_type: clover
-              coverage_badge_path: badge.svg
-              push_badge: true
-              commit_message: Update code coverage badge
+              user_name: 'github-actions[bot]'
+              user_email: 'github-actions[bot]@users.noreply.github.com'
