@@ -32,4 +32,21 @@ class ClientTest extends TestCase
         $this->assertSame($body, $client->put('some/endpoint', ['a' => 2]));
         $this->assertSame($body, $client->delete('some/endpoint'));
     }
+
+    public function testAddApiKeyInjectsKey()
+    {
+        $client = $this->makeClient();
+
+        $ref = new \ReflectionClass($client);
+        $method = $ref->getMethod('addApiKey');
+        $method->setAccessible(true);
+
+        $data = ['foo' => 'bar'];
+        $result = $method->invoke($client, $data);
+
+    $this->assertArrayHasKey('auth', $result);
+    $this->assertIsArray($result['auth']);
+    $this->assertSame('test_api_key', $result['auth'][0]);
+        $this->assertSame('bar', $result['foo']);
+    }
 }

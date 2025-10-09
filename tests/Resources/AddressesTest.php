@@ -86,8 +86,8 @@ class AddressesTest extends TestCase
     $this->assertStringContainsString('country=GB', $bodyString);
     $this->assertStringContainsString('state=NY', $bodyString);
 
-    // API key should be present in the outgoing form payload
-    $this->assertStringContainsString('api_key=test_api_key', $bodyString);
+    // API key should be present in the outgoing form payload (auth[0] encoded)
+    $this->assertStringContainsString('auth%5B0%5D=test_api_key', $bodyString);
     }
 
     public function testValidateRejectsUnknownCountry()

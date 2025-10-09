@@ -231,4 +231,95 @@ class Campaigns extends Resource
     {
         return $this->client->get("campaigns/cost", ['id' => $id]);
     }
+
+    /**
+     * Get available dates for campaign sending.
+     *
+     * @link https://www.stannp.com/us/direct-mail-api/campaigns#available_dates
+     *
+     * @param date $start YYYY-mm-dd (defaults to today).
+     * @param date $end   YYYY-mm-dd (defaults to 30 days time).
+     * @return array
+     * @throws \Phannp\Exceptions\ApiException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function availableDates(string $start = null, string $end = null): array
+    {
+        // Validate provided date strings (if any) to be Y-m-d.
+        if ($start !== null) {
+            $parsed = \DateTimeImmutable::createFromFormat('Y-m-d', $start);
+            if ($parsed === false || $parsed->format('Y-m-d') !== $start) {
+                throw new \Phannp\Exceptions\PhannpException('Parameter "start" must be a date in YYYY-mm-dd format.');
+            }
+        }
+
+        if ($end !== null) {
+            $parsed = \DateTimeImmutable::createFromFormat('Y-m-d', $end);
+            if ($parsed === false || $parsed->format('Y-m-d') !== $end) {
+                throw new \Phannp\Exceptions\PhannpException('Parameter "end" must be a date in YYYY-mm-dd format.');
+            }
+        }
+
+        // Determine parameters using a simple set of defaulting rules:
+        // - both null: start = today, end = today + 30 days (uses date provider)
+        // - start provided, end null: end = start + 30 days
+        // - end provided, start null: start = end - 30 days
+        // - both provided: use provided values
+        $params = [];
+
+        if ($start === null && $end === null) {
+            $dateProvider = $this->client->getDateProvider();
+            $today = \DateTimeImmutable::createFromFormat('Y-m-d', ($dateProvider)());
+            $params['start'] = $today->format('Y-m-d');
+            $params['end'] = $today->add(new \DateInterval('P30D'))->format('Y-m-d');
+        } elseif ($start !== null && $end === null) {
+            $params['start'] = $start;
+            $d = \DateTimeImmutable::createFromFormat('Y-m-d', $start);
+            $params['end'] = $d->add(new \DateInterval('P30D'))->format('Y-m-d');
+        } elseif ($start === null && $end !== null) {
+            $params['end'] = $end;
+            $d = \DateTimeImmutable::createFromFormat('Y-m-d', $end);
+            $params['start'] = $d->sub(new \DateInterval('P30D'))->format('Y-m-d');
+        } else {
+            $params['start'] = $start;
+            $params['end'] = $end;
+        }
+
+        return $this->client->get('campaigns/available-dates', $params);
+    }
+
+    /**
+     * Book a campaign to be sent on a specific date.
+     *
+     * @link https://www.stannp.com/us/direct-mail-api/campaigns#book
+     *
+     * @param int $id Campaign ID
+     * @param string $sendDate Date to send the campaign (YYYY-mm-dd)
+     * @param bool $nextAvailableDate If true, and the requested date is not available,
+     *                                the next available date will be used instead.
+     *                                If false, an exception will be thrown if the
+     *                                requested date is not available.
+     *                                Default: true.
+     * @param bool $useBalance If true, the campaign cost will be deducted from
+     *                         your account balance. If false, the campaign will
+     *                         be charged to your saved payment method. Default: true.
+     * @return array
+     * @throws \Phannp\Exceptions\ApiException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function book(int $id, string $sendDate, bool $nextAvailableDate = true, bool $useBalance = true): array
+    {
+        // Validate provided date string to be Y-m-d.
+        $parsed = \DateTimeImmutable::createFromFormat('Y-m-d', $sendDate);
+        if ($parsed === false || $parsed->format('Y-m-d') !== $sendDate) {
+            throw new \Phannp\Exceptions\PhannpException('Parameter "sendDate" must be a date in YYYY-mm-dd format.');
+        }
+
+        return $this->client->post('campaigns/book', [
+            'id'                    => $id,
+            'send_date'             => $sendDate,
+            'next_available_date'   => $nextAvailableDate,
+            'use_balance'           => $useBalance
+        ]);
+    }
 }
