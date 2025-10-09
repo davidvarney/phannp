@@ -195,6 +195,12 @@ $balance = $client->account->getBalance();
 $result = $client->account->topUp(['amount' => 100]);
 ```
 
+Account top-up caveats
+- Top-ups are forwarded directly to the Stannp API. Confirm the account `currency` and available balance with `getBalance()` before calling `topUp()` to avoid unexpected charges.
+- The SDK forwards whatever `amount` you send as-is. If you need idempotency for retries, implement an external idempotency key on your side and avoid calling `topUp()` multiple times for the same logical operation.
+- Rate limits and limits on top-up amounts are enforced by Stannp; the SDK will surface API errors as `Phannp\Exceptions\ApiException` with the upstream message and HTTP status code.
+
+
 ### Addresses
 
 ```php
@@ -277,6 +283,35 @@ try {
     $postcard = $client->postcards->get(123);
 } catch (ApiException $e) {
     echo 'API Error: ' . $e->getMessage();
+}
+```
+
+More detailed error handling
+
+The SDK also defines `Phannp\Exceptions\PhannpException` for client-side errors (validation, argument issues) and `Phannp\Exceptions\ApiException` for server/API errors. Example showing both:
+
+```php
+use Phannp\Client;
+use Phannp\Exceptions\ApiException;
+use Phannp\Exceptions\PhannpException;
+
+try {
+    $client = new Client('your-api-key');
+    // This may throw PhannpException for client-side validation
+    $client->addresses->validate(['address1' => '1', 'country' => 'XX']);
+} catch (PhannpException $e) {
+    // Validation or SDK usage error (e.g. wrong parameter type)
+    echo 'Client error: ' . $e->getMessage();
+} catch (ApiException $e) {
+    // HTTP/API error. ApiException wraps the underlying Guzzle exception.
+    // You can inspect the HTTP status code and upstream message.
+    echo 'API Error: ' . $e->getMessage();
+    $code = $e->getCode();
+    // For detailed debugging you can inspect the previous exception
+    $previous = $e->getPrevious();
+    if ($previous) {
+        echo '\nUpstream: ' . $previous->getMessage();
+    }
 }
 ```
 
