@@ -19,7 +19,7 @@ namespace Phannp\Resources;
 class Events extends Resource
 {
     /**
-     * Create a new event
+     * Create a new event for a given recipient.
      *
      * @param string $recipient_id  An id of the recipient. This needs to be the recipient_id or the alternative
      *                              reference id which can be used to match an id from a different system.
