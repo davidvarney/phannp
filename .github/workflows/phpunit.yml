@@ -24,6 +24,7 @@
           - name: Create and push coverage badge
             uses: timkrase/phpunit-coverage-badge@v1.2.1
             with:
+              github_token: ${{ secrets.GITHUB_TOKEN }}
               report: clover.xml
               report_type: clover
               coverage_badge_path: badge.svg
