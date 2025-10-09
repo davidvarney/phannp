@@ -224,6 +224,99 @@ Notes on Addresses validation
 
 If you need to assert what the SDK sends, the test helpers add a Guzzle history middleware so any outgoing requests can be inspected in tests.
 
+Asserting outgoing requests (examples)
+
+Example — ergonomic pair helper (recommended):
+
+```php
+[$client, $getHistory] = $this->makeClientWithHistoryPair([
+    new \GuzzleHttp\Psr7\Response(200, [], json_encode(['ok' => true])),
+]);
+
+$client->campaigns->approve(123);
+
+// Get a fresh copy of the recorded history
+$history = $getHistory();
+$this->assertCount(1, $history);
+$entry = $history[0];
+$request = $entry['request'];
+
+// Assert request method and URI
+$this->assertSame('POST', $request->getMethod());
+$this->assertStringContainsString('campaigns/approve', (string) $request->getUri());
+
+// Assert headers
+$this->assertStringContainsString('application/x-www-form-urlencoded', $request->getHeaderLine('Content-Type'));
+
+// Inspect form body
+$body = (string) $request->getBody();
+parse_str($body, $params);
+$this->assertSame('123', $params['id']);
+$this->assertSame('test_api_key', $params['api_key']);
+```
+
+Example — manual history (pass-by-reference):
+
+```php
+$history = [];
+$client = $this->makeClientWithHistory([
+    new \GuzzleHttp\Psr7\Response(200, [], json_encode(['ok' => true])),
+], [], $history);
+
+$client->recipients->create([
+    'firstname' => 'Jane',
+    'lastname' => 'Doe',
+    'address1' => '1 Example St',
+    'city' => 'London',
+    'postcode' => 'EC1A 1BB',
+    'country' => 'GB',
+]);
+
+$this->assertNotEmpty($history);
+$req = $history[0]['request'];
+$this->assertSame('POST', $req->getMethod());
+// For multipart requests (file uploads) inspect the Content-Type and parsed parts
+$this->assertStringContainsString('multipart/form-data', $req->getHeaderLine('Content-Type'));
+
+// Use the test helpers to parse multipart parts and assert filename
+$parts = $this->parseMultipartBody($req);
+$filePart = null;
+foreach ($parts as $p) {
+    if ($p['name'] === 'file') {
+        $filePart = $p;
+        break;
+    }
+}
+
+$this->assertNotNull($filePart);
+$this->assertSame('a.pdf', $filePart['filename']);
+$this->assertStringContainsString('%PDF', $filePart['body']);
+```
+
+Notes:
+- Prefer `makeClientWithHistoryPair()` in most tests — it returns a closure that always reads the up-to-date recorded history.
+- For multipart bodies there isn't a convenient parser in tests; assert the `Content-Type` includes `multipart/form-data` and inspect the raw body for expected filenames or boundaries.
+
+Quick helper: name => body map
+
+If you only care about the parts' bodies (not filenames or disposition details) use `getMultipartParts()` which returns a simple name=>body map:
+
+```php
+[$client, $getHistory] = $this->makeClientWithHistoryPair([
+    new \GuzzleHttp\Psr7\Response(200, [], json_encode(['ok' => true])),
+]);
+
+$client->files->upload(['file' => fopen('/tmp/a.pdf', 'r')]);
+
+$history = $getHistory();
+$req = $history[0]['request'];
+
+$this->assertStringContainsString('multipart/form-data', $req->getHeaderLine('Content-Type'));
+$map = $this->getMultipartParts($req);
+$this->assertArrayHasKey('file', $map);
+$this->assertStringContainsString('%PDF', $map['file']);
+```
+
 ### Tools
 
 ```php
@@ -313,6 +406,29 @@ try {
         echo '\nUpstream: ' . $previous->getMessage();
     }
 }
+
+Inspecting API response JSON
+
+ApiException exposes helpers to inspect the HTTP details returned by the API. Use `getResponseJson()` to attempt decoding a JSON body (returns an associative array or `null` if decoding fails):
+
+```php
+try {
+    $client->campaigns->approve(123);
+} catch (ApiException $e) {
+    $status = $e->getStatusCode();
+    $raw = $e->getResponseBody();
+    $json = $e->getResponseJson();
+
+    echo "Status: {$status}\n";
+    if ($json) {
+        // Inspect structured error fields
+        echo 'API message: ' . ($json['message'] ?? $json['error'] ?? json_encode($json));
+    } else {
+        // Fallback to raw body
+        echo 'Raw response: ' . $raw;
+    }
+}
+```
 ```
 
 ## License

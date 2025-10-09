@@ -77,12 +77,66 @@ class Client
 
     public function post(string $endpoint, array $data = []): array
     {
-        return $this->request('POST', $endpoint, ['form_params' => $this->addApiKey($data)]);
+        $dataWithKey = $this->addApiKey($data);
+        $options = $this->buildBodyOptions($dataWithKey);
+
+        return $this->request('POST', $endpoint, $options);
     }
 
     public function put(string $endpoint, array $data = []): array
     {
-        return $this->request('PUT', $endpoint, ['form_params' => $this->addApiKey($data)]);
+        $dataWithKey = $this->addApiKey($data);
+        $options = $this->buildBodyOptions($dataWithKey);
+
+        return $this->request('PUT', $endpoint, $options);
+    }
+
+    /**
+     * Build Guzzle request body options. If any of the known file keys
+     * (file, front, back) contains a resource or a local file path, use
+     * multipart; otherwise use form_params.
+     *
+     * @param array $data
+     * @return array
+     */
+    private function buildBodyOptions(array $data): array
+    {
+        $fileKeys = ['file', 'front', 'back'];
+
+        $needsMultipart = false;
+        foreach ($fileKeys as $k) {
+            if (isset($data[$k])) {
+                $v = $data[$k];
+                if (is_resource($v) || (is_string($v) && file_exists($v))) {
+                    $needsMultipart = true;
+                    break;
+                }
+            }
+        }
+
+        if (!$needsMultipart) {
+            return ['form_params' => $data];
+        }
+
+        $multipart = [];
+        foreach ($data as $name => $value) {
+            if (in_array($name, $fileKeys, true) && (is_resource($value) || (is_string($value) && file_exists($value)))) {
+                if (is_resource($value)) {
+                    $multipart[] = ['name' => $name, 'contents' => $value];
+                } else {
+                    $multipart[] = ['name' => $name, 'contents' => fopen($value, 'r')];
+                }
+            } else {
+                // Scalars and arrays: send arrays as JSON strings
+                if (is_array($value)) {
+                    $multipart[] = ['name' => $name, 'contents' => json_encode($value)];
+                } else {
+                    $multipart[] = ['name' => $name, 'contents' => (string) $value];
+                }
+            }
+        }
+
+        return ['multipart' => $multipart];
     }
 
     public function delete(string $endpoint, array $params = []): array
@@ -98,11 +152,13 @@ class Client
 
             return json_decode($body, true) ?? [];
         } catch (GuzzleException $e) {
-            throw new ApiException(
-                'API request failed: ' . $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
+            // Try to extract a response if available (RequestException)
+            $response = null;
+            if (method_exists($e, 'getResponse')) {
+                $response = $e->getResponse();
+            }
+
+            throw \Phannp\Exceptions\ApiException::fromResponse('API request failed: ' . $e->getMessage(), $e, $response);
         }
     }
 
