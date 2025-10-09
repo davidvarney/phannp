@@ -94,29 +94,29 @@ class Letters extends Resource
 
     /**
      * Get the details of a letter by its ID.
-     * 
+     *
      * @link https://www.stannp.com/us/direct-mail-api/letters#getLetter
-     * 
+     *
      * @param int $id The letter ID
      * @return array
      * @throws \Phannp\Exceptions\ApiException on HTTP or API errors
      */
     public function get(int $id): array
     {
-        return $this->client->get("letters/get/".$id);
+        return $this->client->get("letters/get/" . $id);
     }
 
     /**
      * Cancel a letter by its ID.
-     * 
+     *
      * @link https://www.stannp.com/us/direct-mail-api/letters#cancelLetter
-     * 
+     *
      * @param int $id The letter ID
      * @return array
      * @throws \Phannp\Exceptions\ApiException on HTTP or API errors
      */
     public function cancel(int $id): array
     {
-        return $this->client->post("letters/cancel/".$id);
+        return $this->client->post("letters/cancel/" . $id);
     }
 }
