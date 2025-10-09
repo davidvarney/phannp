@@ -13,11 +13,11 @@ class Campaigns extends Resource
 {
     /**
      * Create a new campaign.
-     * 
+     *
      * @link https://www.stannp.com/us/direct-mail-api/campaigns#create
-     * 
+     *
      * The method will throw an ApiException if the API request fails.
-     * 
+     *
      * Allowed parameters:
      * - name (string, required)
      * - type (string, required, one of 'a6-postcard', 'a5-postcard', 'letter', 'sms')
@@ -34,7 +34,7 @@ class Campaigns extends Resource
      *     "not_valid" sends to only non-validated addresses.
      *     "int" sends to only international addresses.)
      * - addons (string, optional, If you have an addon code)
-     *   
+     *
      * @param array $data
      * @return array
      * @throws \Phannp\Exceptions\ApiException
@@ -59,64 +59,90 @@ class Campaigns extends Resource
 
         $unknown = array_diff(array_keys($data), $allowed);
         if (!empty($unknown)) {
-            throw new \Phannp\Exceptions\PhannpException('Unknown parameter(s) for Campaigns::create: ' . implode(', ', $unknown));
+            throw new \Phannp\Exceptions\PhannpException(
+                'Unknown parameter(s) for Campaigns::create: ' . implode(', ', $unknown)
+            );
         }
 
         // Required: name
         if (!isset($data['name']) || !is_string($data['name']) || $data['name'] === '') {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "name" is required and must be a non-empty string.');
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "name" is required and must be a non-empty string.'
+            );
         }
 
         // Required: type
         if (!isset($data['type']) || !is_string($data['type'])) {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "type" is required and must be a string.');
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "type" is required and must be a string.'
+            );
         }
 
         $allowedTypes = ['a6-postcard', 'a5-postcard', 'letter', 'sms'];
         if (!in_array(strtolower($data['type']), $allowedTypes, true)) {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "type" must be one of: ' . implode(', ', $allowedTypes));
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "type" must be one of: ' . implode(', ', $allowedTypes)
+            );
         }
 
         // Required: template_id
         if (!isset($data['template_id']) || !is_int($data['template_id'])) {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "template_id" is required and must be an integer.');
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "template_id" is required and must be an integer.'
+            );
         }
 
         // Optional fields type checks
         if (isset($data['file']) && !is_string($data['file']) && !is_resource($data['file'])) {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "file" must be a string (URL or file path) or a resource when provided.');
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "file" must be a string (URL or file path) or a resource when provided.'
+            );
         }
 
         if (isset($data['front']) && !is_string($data['front']) && !is_resource($data['front'])) {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "front" must be a string (URL or file path) or a resource when provided.');
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "front" must be a string (URL or file path) or a resource when provided.'
+            );
         }
 
         if (isset($data['back']) && !is_string($data['back']) && !is_resource($data['back'])) {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "back" must be a string (URL or file path) or a resource when provided.');
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "back" must be a string (URL or file path) or a resource when provided.'
+            );
         }
 
         if (isset($data['size']) && !is_string($data['size'])) {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "size" must be a string when provided.');
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "size" must be a string when provided.'
+            );
         }
 
         if (isset($data['save']) && !is_bool($data['save'])) {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "save" must be a boolean when provided.');
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "save" must be a boolean when provided.'
+            );
         }
 
         if (isset($data['group_id']) && !is_int($data['group_id'])) {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "group_id" must be an integer when provided.');
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "group_id" must be an integer when provided.'
+            );
         }
 
         if (isset($data['what_recipients'])) {
             $wr = $data['what_recipients'];
             $allowedWr = ['all', 'valid', 'not_valid', 'int'];
             if (!is_string($wr) || !in_array($wr, $allowedWr, true)) {
-                throw new \Phannp\Exceptions\PhannpException('Parameter "what_recipients" must be one of: ' . implode(', ', $allowedWr));
+                throw new \Phannp\Exceptions\PhannpException(
+                    'Parameter "what_recipients" must be one of: ' . implode(', ', $allowedWr)
+                );
             }
         }
 
         if (isset($data['addons']) && !is_string($data['addons'])) {
-            throw new \Phannp\Exceptions\PhannpException('Parameter "addons" must be a string when provided.');
+            throw new \Phannp\Exceptions\PhannpException(
+                'Parameter "addons" must be a string when provided.'
+            );
         }
 
 
@@ -131,7 +157,7 @@ class Campaigns extends Resource
 
     /**
      * Get a campaign by ID.
-     * 
+     *
      * @link https://www.stannp.com/us/direct-mail-api/campaigns#get
      *
      * @param int $id
@@ -146,9 +172,9 @@ class Campaigns extends Resource
 
     /**
      * List campaigns.
-     * 
+     *
      * @link https://www.stannp.com/us/direct-mail-api/campaigns#list
-     * 
+     *
      * @param array $params Optional query parameters
      */
     public function list(array $params = []): array
@@ -163,9 +189,9 @@ class Campaigns extends Resource
 
     /**
      * Produce a sample of a campaign by ID.
-     * 
+     *
      * @link https://www.stannp.com/us/direct-mail-api/campaigns#sample
-     * 
+     *
      * @param int $id
      * @return array
      * @throws \Phannp\Exceptions\ApiException
@@ -178,9 +204,9 @@ class Campaigns extends Resource
 
     /**
      * Approve a campaign by ID.
-     * 
+     *
      * @link https://www.stannp.com/us/direct-mail-api/campaigns#approve
-     * 
+     *
      * @param int $id
      * @return array
      * @throws \Phannp\Exceptions\ApiException

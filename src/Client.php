@@ -120,7 +120,16 @@ class Client
 
         $multipart = [];
         foreach ($data as $name => $value) {
-            if (in_array($name, $fileKeys, true) && (is_resource($value) || (is_string($value) && file_exists($value)))) {
+            if (
+                in_array($name, $fileKeys, true) &&
+                (
+                    is_resource($value) ||
+                    (
+                        is_string($value) &&
+                        file_exists($value)
+                    )
+                )
+            ) {
                 if (is_resource($value)) {
                     $multipart[] = ['name' => $name, 'contents' => $value];
                 } else {
@@ -158,7 +167,11 @@ class Client
                 $response = $e->getResponse();
             }
 
-            throw \Phannp\Exceptions\ApiException::fromResponse('API request failed: ' . $e->getMessage(), $e, $response);
+            throw \Phannp\Exceptions\ApiException::fromResponse(
+                'API request failed: ' . $e->getMessage(),
+                $e,
+                $response
+            );
         }
     }
 
