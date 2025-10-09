@@ -120,10 +120,18 @@ $result = $client->groups->removeRecipient(123, 456);
 ### Events
 
 ```php
-// List events
-$events = $client->events->list(['limit' => 10]);
+// Create an event
+$event = $client->events->create(
+    'recipient-123', // recipient id or external reference
+    'PURCHASE',       // event name
+    '49.99',          // value
+    true,             // conversion
+    json_encode(['sku' => 'X']), // data
+    'ref-1'           // ref
+);
 
-// Get an event
+// Optionally: list or get events if supported by your account
+$events = $client->events->list(['limit' => 10]);
 $event = $client->events->get(123);
 ```
 
