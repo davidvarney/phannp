@@ -1,6 +1,13 @@
-name: phpunit
+name: PHPUnit
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
 
 jobs:
   phpunit:
@@ -10,16 +17,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          extensions: mbstring, xml, ctype, json, curl
+
+      - name: Show repo files and phpunit config (diagnostic)
+        run: |
+          echo "Listing repo root:" && ls -la
+          echo "Looking for phpunit config files:" && ls -la phpunit.* || true
+
+      - name: Cache Composer vendor
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-vendor-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-vendor-
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
+        run: composer install --no-interaction --prefer-dist --no-progress
 
-      - name: Run PHPUnit
-        run: ./vendor/bin/phpunit
+      - name: Run PHPUnit (pick config if present)
+        run: |
+          echo "Checking for phpunit configuration files..."
+          if [ -f phpunit.xml ]; then
+            CONFIG=phpunit.xml
+          elif [ -f phpunit.xml.dist ]; then
+            CONFIG=phpunit.xml.dist
+          else
+            CONFIG=""
+          fi
+          echo "Using config: $CONFIG"
+          if [ -n "$CONFIG" ]; then
+            ./vendor/bin/phpunit --configuration "$CONFIG" --colors=always
+          else
+            ./vendor/bin/phpunit --colors=always
+          fi
 
       - name: Upload test logs (on failure)
         if: failure()
