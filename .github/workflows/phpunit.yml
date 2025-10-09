@@ -19,7 +19,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Run PHPUnit
-        run: ./vendor/bin/phpunit --configuration phpunit.xml.dist
+        run: ./vendor/bin/phpunit --configuration phpunit.xml
 
       - name: Upload test logs (on failure)
         if: failure()
