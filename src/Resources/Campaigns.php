@@ -216,4 +216,19 @@ class Campaigns extends Resource
     {
         return $this->client->post("campaigns/approve", ['id' => $id]);
     }
+
+    /**
+     * Get the cost of a campaign by ID.
+     *
+     * @link https://www.stannp.com/us/direct-mail-api/campaigns#cost
+     *
+     * @param int $id
+     * @return array
+     * @throws \Phannp\Exceptions\ApiException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function cost(int $id): array
+    {
+        return $this->client->get("campaigns/cost", ['id' => $id]);
+    }
 }

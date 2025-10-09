@@ -47,6 +47,26 @@ class CampaignsTest extends TestCase
         $this->assertStringContainsString('api_key=test_api_key', $query);
     }
 
+    public function testCost()
+    {
+        $body = ['ok' => true];
+        [$client, $getHistory] = $this->makeClientWithHistoryPair([new \GuzzleHttp\Psr7\Response(200, [], json_encode($body))]);
+
+        $this->assertSame($body, $client->campaigns->cost(321));
+
+        $history = $getHistory();
+        $this->assertCount(1, $history);
+
+        $request = $history[0]['request'];
+
+        $this->assertSame('GET', $request->getMethod());
+        $this->assertStringContainsString('campaigns/cost', (string) $request->getUri()->getPath());
+
+        $query = $request->getUri()->getQuery();
+        $this->assertStringContainsString('id=321', $query);
+        $this->assertStringContainsString('api_key=test_api_key', $query);
+    }
+
     public function testApprove()
     {
         $body = ['ok' => true];
@@ -93,6 +113,32 @@ class CampaignsTest extends TestCase
 
         try {
             $client->campaigns->get(1);
+            $this->fail('Expected ApiException was not thrown');
+        } catch (\Phannp\Exceptions\ApiException $e) {
+            $this->assertSame(500, $e->getStatusCode());
+            $this->assertStringContainsString('Server error', $e->getResponseBody());
+        }
+    }
+
+    public function testCostThrowsApiExceptionOn4xx()
+    {
+        [$client] = $this->makeClientWithHistoryPair([new \GuzzleHttp\Psr7\Response(400, [], json_encode(['error' => 'bad']))]);
+
+        try {
+            $client->campaigns->cost(99);
+            $this->fail('Expected ApiException was not thrown');
+        } catch (\Phannp\Exceptions\ApiException $e) {
+            $this->assertSame(400, $e->getStatusCode());
+            $this->assertStringContainsString('error', $e->getResponseBody());
+        }
+    }
+
+    public function testCostThrowsApiExceptionOn5xx()
+    {
+        [$client] = $this->makeClientWithHistoryPair([new \GuzzleHttp\Psr7\Response(500, [], 'Server error')]);
+
+        try {
+            $client->campaigns->cost(99);
             $this->fail('Expected ApiException was not thrown');
         } catch (\Phannp\Exceptions\ApiException $e) {
             $this->assertSame(500, $e->getStatusCode());
