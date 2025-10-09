@@ -18,7 +18,7 @@ jobs:
         ini-values: memory_limit=-1 # Adjust as needed
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --prefer-stable
+      run: composer install --prefer-dist --no-progress
 
     - name: Run PHPUnit tests with coverage
       run: vendor/bin/phpunit --coverage-clover clover.xml
