@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="/Users/davidvarney/Development/phannp/phpunit.xml.dist" tests="22" assertions="56" errors="0" failures="0" skipped="0" time="0.022491">
+    <testsuite name="phannp" tests="22" assertions="56" errors="0" failures="0" skipped="0" time="0.022491">
+      <testsuite name="Phannp\Tests\ClientTest" file="/Users/davidvarney/Development/phannp/tests/ClientTest.php" tests="2" assertions="6" errors="0" failures="0" skipped="0" time="0.011651">
+        <testcase name="testGetAndResourcesWired" file="/Users/davidvarney/Development/phannp/tests/ClientTest.php" line="9" class="Phannp\Tests\ClientTest" classname="Phannp.Tests.ClientTest" assertions="3" time="0.010964"/>
+        <testcase name="testPostPutDelete" file="/Users/davidvarney/Development/phannp/tests/ClientTest.php" line="22" class="Phannp\Tests\ClientTest" classname="Phannp.Tests.ClientTest" assertions="3" time="0.000686"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\AccountTest" file="/Users/davidvarney/Development/phannp/tests/Resources/AccountTest.php" tests="1" assertions="2" errors="0" failures="0" skipped="0" time="0.000448">
+        <testcase name="testGetAndBalance" file="/Users/davidvarney/Development/phannp/tests/Resources/AccountTest.php" line="10" class="Phannp\Tests\Resources\AccountTest" classname="Phannp.Tests.Resources.AccountTest" assertions="2" time="0.000448"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\AddressesTest" file="/Users/davidvarney/Development/phannp/tests/Resources/AddressesTest.php" tests="8" assertions="8" errors="0" failures="0" skipped="0" time="0.002682">
+        <testcase name="testValidate" file="/Users/davidvarney/Development/phannp/tests/Resources/AddressesTest.php" line="10" class="Phannp\Tests\Resources\AddressesTest" classname="Phannp.Tests.Resources.AddressesTest" assertions="1" time="0.000332"/>
+        <testcase name="testValidateThrowsOnUnknownParameter" file="/Users/davidvarney/Development/phannp/tests/Resources/AddressesTest.php" line="18" class="Phannp\Tests\Resources\AddressesTest" classname="Phannp.Tests.Resources.AddressesTest" assertions="1" time="0.000577"/>
+        <testcase name="testValidateThrowsOnNonString" file="/Users/davidvarney/Development/phannp/tests/Resources/AddressesTest.php" line="26" class="Phannp\Tests\Resources\AddressesTest" classname="Phannp.Tests.Resources.AddressesTest" assertions="1" time="0.000237"/>
+        <testcase name="testValidateRejectsInvalidState" file="/Users/davidvarney/Development/phannp/tests/Resources/AddressesTest.php" line="34" class="Phannp\Tests\Resources\AddressesTest" classname="Phannp.Tests.Resources.AddressesTest" assertions="1" time="0.000260"/>
+        <testcase name="testValidateRejectsInvalidCountry" file="/Users/davidvarney/Development/phannp/tests/Resources/AddressesTest.php" line="42" class="Phannp\Tests\Resources\AddressesTest" classname="Phannp.Tests.Resources.AddressesTest" assertions="1" time="0.000226"/>
+        <testcase name="testValidateNormalizesCountryAndState" file="/Users/davidvarney/Development/phannp/tests/Resources/AddressesTest.php" line="50" class="Phannp\Tests\Resources\AddressesTest" classname="Phannp.Tests.Resources.AddressesTest" assertions="1" time="0.000449"/>
+        <testcase name="testValidateAcceptsKnownCountryAndState" file="/Users/davidvarney/Development/phannp/tests/Resources/AddressesTest.php" line="59" class="Phannp\Tests\Resources\AddressesTest" classname="Phannp.Tests.Resources.AddressesTest" assertions="1" time="0.000344"/>
+        <testcase name="testValidateRejectsUnknownCountry" file="/Users/davidvarney/Development/phannp/tests/Resources/AddressesTest.php" line="68" class="Phannp\Tests\Resources\AddressesTest" classname="Phannp.Tests.Resources.AddressesTest" assertions="1" time="0.000258"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\CampaignsTest" file="/Users/davidvarney/Development/phannp/tests/Resources/CampaignsTest.php" tests="1" assertions="4" errors="0" failures="0" skipped="0" time="0.000802">
+        <testcase name="testCrud" file="/Users/davidvarney/Development/phannp/tests/Resources/CampaignsTest.php" line="10" class="Phannp\Tests\Resources\CampaignsTest" classname="Phannp.Tests.Resources.CampaignsTest" assertions="4" time="0.000802"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\EventsTest" file="/Users/davidvarney/Development/phannp/tests/Resources/EventsTest.php" tests="1" assertions="2" errors="0" failures="0" skipped="0" time="0.000519">
+        <testcase name="testListAndGet" file="/Users/davidvarney/Development/phannp/tests/Resources/EventsTest.php" line="10" class="Phannp\Tests\Resources\EventsTest" classname="Phannp.Tests.Resources.EventsTest" assertions="2" time="0.000519"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\FilesTest" file="/Users/davidvarney/Development/phannp/tests/Resources/FilesTest.php" tests="1" assertions="4" errors="0" failures="0" skipped="0" time="0.000638">
+        <testcase name="testUploadGetListDelete" file="/Users/davidvarney/Development/phannp/tests/Resources/FilesTest.php" line="10" class="Phannp\Tests\Resources\FilesTest" classname="Phannp.Tests.Resources.FilesTest" assertions="4" time="0.000638"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\GroupsTest" file="/Users/davidvarney/Development/phannp/tests/Resources/GroupsTest.php" tests="1" assertions="6" errors="0" failures="0" skipped="0" time="0.000840">
+        <testcase name="testCrudAndAddRemoveRecipient" file="/Users/davidvarney/Development/phannp/tests/Resources/GroupsTest.php" line="10" class="Phannp\Tests\Resources\GroupsTest" classname="Phannp.Tests.Resources.GroupsTest" assertions="6" time="0.000840"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\LettersTest" file="/Users/davidvarney/Development/phannp/tests/Resources/LettersTest.php" tests="1" assertions="4" errors="0" failures="0" skipped="0" time="0.000717">
+        <testcase name="testCrud" file="/Users/davidvarney/Development/phannp/tests/Resources/LettersTest.php" line="10" class="Phannp\Tests\Resources\LettersTest" classname="Phannp.Tests.Resources.LettersTest" assertions="4" time="0.000717"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\PostcardsTest" file="/Users/davidvarney/Development/phannp/tests/Resources/PostcardsTest.php" tests="1" assertions="4" errors="0" failures="0" skipped="0" time="0.000682">
+        <testcase name="testCreateGetListCancel" file="/Users/davidvarney/Development/phannp/tests/Resources/PostcardsTest.php" line="10" class="Phannp\Tests\Resources\PostcardsTest" classname="Phannp.Tests.Resources.PostcardsTest" assertions="4" time="0.000682"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\RecipientsTest" file="/Users/davidvarney/Development/phannp/tests/Resources/RecipientsTest.php" tests="1" assertions="5" errors="0" failures="0" skipped="0" time="0.001212">
+        <testcase name="testCrud" file="/Users/davidvarney/Development/phannp/tests/Resources/RecipientsTest.php" line="10" class="Phannp\Tests\Resources\RecipientsTest" classname="Phannp.Tests.Resources.RecipientsTest" assertions="5" time="0.001212"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\ReportingTest" file="/Users/davidvarney/Development/phannp/tests/Resources/ReportingTest.php" tests="1" assertions="2" errors="0" failures="0" skipped="0" time="0.000536">
+        <testcase name="testGetStatsAndCampaignStats" file="/Users/davidvarney/Development/phannp/tests/Resources/ReportingTest.php" line="10" class="Phannp\Tests\Resources\ReportingTest" classname="Phannp.Tests.Resources.ReportingTest" assertions="2" time="0.000536"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\SMSTest" file="/Users/davidvarney/Development/phannp/tests/Resources/SMSTest.php" tests="1" assertions="3" errors="0" failures="0" skipped="0" time="0.000612">
+        <testcase name="testSendGetList" file="/Users/davidvarney/Development/phannp/tests/Resources/SMSTest.php" line="10" class="Phannp\Tests\Resources\SMSTest" classname="Phannp.Tests.Resources.SMSTest" assertions="3" time="0.000612"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\SelectionsTest" file="/Users/davidvarney/Development/phannp/tests/Resources/SelectionsTest.php" tests="1" assertions="3" errors="0" failures="0" skipped="0" time="0.000585">
+        <testcase name="testCreateGetList" file="/Users/davidvarney/Development/phannp/tests/Resources/SelectionsTest.php" line="10" class="Phannp\Tests\Resources\SelectionsTest" classname="Phannp.Tests.Resources.SelectionsTest" assertions="3" time="0.000585"/>
+      </testsuite>
+      <testsuite name="Phannp\Tests\Resources\ToolsTest" file="/Users/davidvarney/Development/phannp/tests/Resources/ToolsTest.php" tests="1" assertions="3" errors="0" failures="0" skipped="0" time="0.000568">
+        <testcase name="testHelpers" file="/Users/davidvarney/Development/phannp/tests/Resources/ToolsTest.php" line="10" class="Phannp\Tests\Resources\ToolsTest" classname="Phannp.Tests.Resources.ToolsTest" assertions="3" time="0.000568"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

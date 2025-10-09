@@ -210,6 +210,14 @@ $result = $client->addresses->validate([
 $addresses = $client->addresses->autocomplete('10001');
 ```
 
+Notes on Addresses validation
+- The `Addresses::validate()` helper accepts only the following keys: `company`, `address1`, `address2`, `city`, `state`, `zipcode`, and `country`.
+- All provided values must be strings.
+- `country` must be an ISO 3166-1 alpha-2 code. For compatibility with Stannp the SDK currently accepts only `US` and `GB` and will suggest the allowed codes on error (for example: use "US" or "GB").
+- `state` and `country` values are normalized to uppercase before being sent to the API (e.g. `gb` -> `GB`, `ny` -> `NY`).
+
+If you need to assert what the SDK sends, the test helpers add a Guzzle history middleware so any outgoing requests can be inspected in tests.
+
 ### Tools
 
 ```php
@@ -221,6 +229,23 @@ $regions = $client->tools->getRegions('US');
 
 // Get pricing
 $pricing = $client->tools->getPricing();
+```
+
+Utilities and Countries helper
+
+This SDK includes a small utilities module under `src/Utilities/`.
+
+- `Phannp\Utilities\Countries` exposes helpers for country validation. Use `Countries::allowedCodes()` to get the canonical list of allowed country codes used by the SDK (currently `['US', 'GB']`) and `Countries::isValid($code)` to check validity.
+
+Example:
+
+```php
+use Phannp\Utilities\Countries;
+
+$allowed = Countries::allowedCodes(); // ['US', 'GB']
+if (!Countries::isValid('US')) {
+    // handle invalid
+}
 ```
 
 ### SMS
