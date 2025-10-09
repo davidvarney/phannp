@@ -17,9 +17,11 @@ class LettersTest extends TestCase
             new Response(200, [], json_encode($body)),
         ]);
 
-        $this->assertSame($body, $client->letters->create(['a' => 1]));
-        $this->assertSame($body, $client->letters->get(1));
-        $this->assertSame($body, $client->letters->list());
-        $this->assertSame($body, $client->letters->cancel(1));
+    // create accepts either an existing recipient id or a new recipient array
+    $this->assertSame($body, $client->letters->create(['a' => 1]));
+    $this->assertSame($body, $client->letters->get(1));
+    // Use post() to send a pre-merged PDF-based letter (country required)
+    $this->assertSame($body, $client->letters->post('US'));
+    $this->assertSame($body, $client->letters->cancel(1));
     }
 }
