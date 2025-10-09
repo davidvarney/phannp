@@ -31,7 +31,7 @@ class Files extends Resource
     }
 
     /**
-     * Cfreate a new folder
+     * Create a new folder
      *
      * @link https://www.stannp.com/us/direct-mail-api/files#createFolder
      *
