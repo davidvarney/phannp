@@ -119,27 +119,38 @@ fclose($fp);
 ### Recipients
 
 ```php
-// Create a recipient
-$recipient = $client->recipients->create([
-    'firstname' => 'John',
-    'lastname' => 'Doe',
-    'address1' => '123 Main St',
-    'city' => 'New York',
-    'postcode' => '10001',
-    'country' => 'US',
-]);
+// Create a recipient (positional parameters)
+// create(firstname, lastname, address1, address2, address3, city, postcode, country,
+//        email, phone_number, ref_id, group_id, on_duplicate, test_level)
+$recipient = $client->recipients->create(
+    'Alice', 'Smith', '23 Baker Street', 'Flat 4', '', 'London', 'NW1 6XE', 'GB',
+    'alice.smith@example.co.uk', '+447911123456', 'alice-001', 0, 'update', 'standard'
+);
 
 // Get a recipient
 $recipient = $client->recipients->get(123);
 
 // List recipients
-$recipients = $client->recipients->list(['limit' => 10]);
+// list(groupId, offset = 0, limit = 0) — pass groupId to filter, use 0 for all groups
+$recipients = $client->recipients->list(0, 0, 10);
 
 // Delete a recipient
 $result = $client->recipients->delete(123);
 
-// Import recipients
-$result = $client->recipients->import(['file' => 'path/to/file.csv']);
+// Import recipients in bulk
+// import(file, group_id, duplicates, no_headings, mappings)
+// - file: path to CSV/XLS, a base64 CSV string, or a URL to the file
+// - group_id: integer group to import into (0 = all / none)
+// - duplicates: 'update' | 'ignore' | 'duplicate'
+// - no_headings: true if the file has no header row
+// - mappings: comma-separated mapping string when headings differ or no_headings=true
+$result = $client->recipients->import(
+    '/tmp/recipients.csv',
+    0,
+    'update',
+    false,
+    'firstname,lastname,company,address1,address2,city,postcode,country,email,phone'
+);
 ```
 
 ### Groups
@@ -219,6 +230,30 @@ fclose($fp);
 $file = $client->files->upload(['file' => 'https://example.com/file.pdf']);
 ```
 
+Additional upload examples
+
+```php
+// Upload a file as part of creating a campaign (file can be a path, resource, or URL)
+$campaign = $client->campaigns->create([
+    'name' => 'Spring Promo',
+    'file' => '/tmp/flyer.pdf', // local path
+]);
+
+// Upload using a resource (useful when streaming files)
+$fp = fopen('/tmp/flyer.pdf', 'r');
+$campaign = $client->campaigns->create([
+    'name' => 'Spring Promo',
+    'file' => $fp,
+]);
+fclose($fp);
+
+// Or pass a URL if the file is hosted remotely
+$campaign = $client->campaigns->create([
+    'name' => 'Spring Promo',
+    'file' => 'https://cdn.example.com/flyer.pdf',
+]);
+```
+
 Asserting multipart in tests
 
 Use the test helper `makeClientWithHistoryPair()` to capture outgoing requests and
@@ -249,6 +284,45 @@ foreach ($parts as $p) {
 
 $this->assertNotNull($filePart);
 $this->assertStringContainsString('%PDF', $filePart['body']);
+```
+
+Concrete test assertion example (full snippet)
+
+```php
+public function testFileUploadSendsMultipart()
+{
+    [$client, $getHistory] = $this->makeClientWithHistoryPair([
+        new \GuzzleHttp\Psr7\Response(200, [], json_encode(['ok' => true])),
+    ]);
+
+    // The SDK accepts resources, paths or URLs
+    $fp = fopen(__DIR__ . '/fixtures/sample.pdf', 'r');
+    $client->files->upload(['file' => $fp]);
+    fclose($fp);
+
+    $history = $getHistory();
+    $this->assertCount(1, $history);
+    $req = $history[0]['request'];
+
+    // Header should indicate multipart
+    $this->assertStringContainsString('multipart/form-data', $req->getHeaderLine('Content-Type'));
+
+    // Parse parts and assert
+    $parts = $this->parseMultipartBody($req);
+    $this->assertNotEmpty($parts);
+
+    $filePart = null;
+    foreach ($parts as $p) {
+        if ($p['name'] === 'file') {
+            $filePart = $p;
+            break;
+        }
+    }
+
+    $this->assertNotNull($filePart, 'File part missing in multipart body');
+    $this->assertNotEmpty($filePart['filename']);
+    $this->assertStringContainsString('%PDF', $filePart['body']);
+}
 ```
 
 ### Reporting
