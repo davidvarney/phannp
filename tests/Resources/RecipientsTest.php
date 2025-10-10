@@ -49,7 +49,7 @@ class RecipientsTest extends TestCase
 
         // Import expects file path or URL, group id, duplicate handling, no_headings flag, and mappings string
         // realistic import invocation: CSV path, group id 0, update duplicates, include headings, mappings
-        $this->assertSame($body, $client->recipients->import('/tmp/recipients.csv', 0, 'update', false, 'firstname,lastname,company,address1,address2,city,postcode,country,email,phone'));
+    $this->assertSame($body, $client->recipients->import('/tmp/recipients.csv', 0, 'update', false, 'firstname,lastname,company,address1,address2,city,postcode,country,email,phone'));
     }
 
     public function testListThrowsOnApiError()

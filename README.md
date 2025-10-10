@@ -296,7 +296,7 @@ public function testFileUploadSendsMultipart()
     ]);
 
     // The SDK accepts resources, paths or URLs
-    $fp = fopen(__DIR__ . '/tests/Resources/fixtures/sample.pdf', 'r');
+    $fp = fopen(__DIR__ . '/tests/fixtures/sample.pdf', 'r');
     $client->files->upload(['file' => $fp]);
     fclose($fp);
 
@@ -488,7 +488,7 @@ If you only care about the parts' bodies (not filenames or disposition details) 
     new \GuzzleHttp\Psr7\Response(200, [], json_encode(['ok' => true])),
 ]);
 
-$client->files->upload(['file' => fopen(__DIR__ . '/tests/Resources/fixtures/sample.pdf', 'r')]);
+$client->files->upload(['file' => fopen(__DIR__ . '/tests/fixtures/sample.pdf', 'r')]);
 
 $history = $getHistory();
 $req = $history[0]['request'];

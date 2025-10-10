@@ -78,6 +78,21 @@ class TestCase extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Return a map of multipart part name => part array (as returned by parseMultipartBody)
+     * @param RequestInterface $request
+     * @return array<string,array>
+     */
+    protected function getMultipartMap(RequestInterface $request): array
+    {
+        $parts = $this->parseMultipartBody($request);
+        $map = [];
+        foreach ($parts as $p) {
+            $map[$p['name']] = $p;
+        }
+        return $map;
+    }
+
+    /**
      * Convenience wrapper that returns [Client, History] and accepts a list of responses.
      * Kept for readability in tests that need many responses.
      * @param array $responses
