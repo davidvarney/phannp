@@ -209,4 +209,61 @@ class TestCase extends \PHPUnit\Framework\TestCase
         }
         return $map;
     }
+
+    /**
+     * Execute a callable that is expected to throw an ApiException and return
+     * the caught exception for further assertions.
+     *
+     * @param callable $fn A zero-argument callable which will perform the API call.
+     * @return \Phannp\Exceptions\ApiException
+     */
+    protected function callAndCatchApiException(callable $fn): \Phannp\Exceptions\ApiException
+    {
+        try {
+            $fn();
+            $this->fail('Expected ApiException');
+        } catch (\Phannp\Exceptions\ApiException $e) {
+            return $e;
+        }
+    }
+
+    /**
+     * Assert the ApiException has the expected HTTP status and optional raw body.
+     *
+     * @param \Phannp\Exceptions\ApiException $ex
+     * @param int $status
+     * @param string|null $body
+     * @return void
+     */
+    protected function assertApiErrorStatusAndBody(\Phannp\Exceptions\ApiException $ex, int $status, ?string $body = null): void
+    {
+        $this->assertSame($status, $ex->getStatusCode());
+        if ($body !== null) {
+            $this->assertSame($body, $ex->getResponseBody());
+        }
+    }
+
+    /**
+     * Assert the ApiException JSON response contains a nested value specified by $path.
+     * Example: $path = ['details','file','size'] will assert $json['details']['file']['size'] === $expected
+     *
+     * @param \Phannp\Exceptions\ApiException $ex
+     * @param array $path
+     * @param mixed $expected
+     * @return void
+     */
+    protected function assertApiErrorJsonHasPath(\Phannp\Exceptions\ApiException $ex, array $path, $expected): void
+    {
+        $json = $ex->getResponseJson();
+        $this->assertIsArray($json, 'Expected response JSON to be an array');
+
+        $cursor = $json;
+        foreach ($path as $key) {
+            $this->assertIsArray($cursor, 'Intermediate value is not an array for path element: ' . (string)$key);
+            $this->assertArrayHasKey($key, $cursor, 'Missing expected JSON key: ' . (string)$key);
+            $cursor = $cursor[$key];
+        }
+
+        $this->assertSame($expected, $cursor);
+    }
 }

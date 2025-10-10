@@ -29,6 +29,25 @@ class SMS extends Resource
         ?int $recipientId = null,
         ?string $country = null
     ): array {
+        // Require either a phone number or recipient id
+        if (($phoneNumber === null || trim($phoneNumber) === '') && $recipientId === null) {
+            throw new \InvalidArgumentException('Either phoneNumber or recipientId must be provided');
+        }
+
+        // Normalize and validate phone number if provided
+        if ($phoneNumber !== null) {
+            $normalizedPhone = preg_replace('/[\s\-()\.]/', '', $phoneNumber);
+            if (!preg_match('/^\+\d{8,15}$/', $normalizedPhone)) {
+                throw new \InvalidArgumentException('phoneNumber must be in E.164 format (e.g. +447911123456)');
+            }
+            $phoneNumber = $normalizedPhone;
+        }
+
+        // Validate country code if provided
+        if ($country !== null && !\Phannp\Utilities\Countries::isValid($country)) {
+            throw new \InvalidArgumentException('country must be a valid ISO 3166-1 alpha-2 code');
+        }
+
         $data = [
             'message' => $message,
             'test' => $test,

@@ -67,11 +67,11 @@ class Recipients extends Resource
             throw new \InvalidArgumentException('country must be a valid ISO 3166-1 alpha-2 code (e.g. GB, US)');
         }
 
-        // Normalize and validate phone number: remove common separators and ensure digits (optionally leading +)
+        // Normalize phone number (strip separators) and enforce E.164: must start with + and 8-15 digits
         if ($phone_number !== null) {
             $normalizedPhone = preg_replace('/[\s\-()\.]/', '', $phone_number);
-            if (!preg_match('/^\+?\d+$/', $normalizedPhone)) {
-                throw new \InvalidArgumentException('phone_number must contain only digits and an optional leading +');
+            if (!preg_match('/^\+\d{8,15}$/', $normalizedPhone)) {
+                throw new \InvalidArgumentException('phone_number must be in E.164 format (e.g. +447911123456)');
             }
             $phone_number = $normalizedPhone;
         }
