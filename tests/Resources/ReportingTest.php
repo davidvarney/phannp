@@ -55,8 +55,8 @@ class ReportingTest extends TestCase
         // Simulate a 400 Bad Request response
         $client = $this->makeClient([new \GuzzleHttp\Psr7\Response(400, [], json_encode(['error' => 'Bad Request']))]);
 
-        // This should raise an ApiException
-        $client->reporting->summary('invalid-date', 'also-invalid');
+        // Use valid dates so the request is sent and the 400 response triggers ApiException
+        $client->reporting->summary('2025-01-01', '2025-01-31');
     }
 
     public function testSummaryNetworkErrorThrowsApiException()
@@ -80,7 +80,8 @@ class ReportingTest extends TestCase
         $client = $this->makeClient([new \GuzzleHttp\Psr7\Response(400, [], json_encode($body))]);
 
         try {
-            $client->reporting->summary('bad', 'bad');
+            // Use valid dates so the client sends the request and the mocked 400 is returned
+            $client->reporting->summary('2025-01-01', '2025-01-31');
             $this->fail('Expected ApiException');
         } catch (\Phannp\Exceptions\ApiException $e) {
             $json = $e->getResponseJson();
@@ -92,11 +93,11 @@ class ReportingTest extends TestCase
 
     public function testSummaryClientSideValidation()
     {
-        $this->expectException(\TypeError::class);
+        $this->expectException(\InvalidArgumentException::class);
 
         $client = $this->makeClient();
 
         // Pass an array where a string flag is expected to provoke a TypeError
-        $client->reporting->summary('2025-01-01', '2025-01-31', ['not-a-string']);
+        $client->reporting->summary('2025-01-01', 'not-a-date', '1');
     }
 }

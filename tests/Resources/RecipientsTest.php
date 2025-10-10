@@ -93,11 +93,57 @@ class RecipientsTest extends TestCase
 
     public function testCreateThrowsOnInvalidTypes()
     {
-        $this->expectException(\TypeError::class);
+        $this->expectException(\InvalidArgumentException::class);
 
         $client = $this->makeClient();
 
         // Pass null for a required string parameter (firstname) to provoke a TypeError
         $client->recipients->create(null, 'Smith', '1 Test St', '', '', 'City', '12345', 'GB', 'a@b.com', '012345', 'ref', 0, 'update', 'standard');
+    }
+
+    public function testCreateRejectsInvalidEmail()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $client = $this->makeClient();
+
+        $client->recipients->create('Alice', 'Smith', '1 Test St', '', '', 'City', '12345', 'GB', 'not-an-email', '012345', 'ref', 0, 'update', 'standard');
+    }
+
+    public function testCreateRejectsInvalidCountry()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $client = $this->makeClient();
+
+        $client->recipients->create('Alice', 'Smith', '1 Test St', '', '', 'City', '12345', 'ZZ', 'alice@example.com', '012345', 'ref', 0, 'update', 'standard');
+    }
+
+    public function testCreateRejectsInvalidPhone()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $client = $this->makeClient();
+
+        $client->recipients->create('Alice', 'Smith', '1 Test St', '', '', 'City', '12345', 'GB', 'alice@example.com', '+44 79-11abc3456', 'ref', 0, 'update', 'standard');
+    }
+
+    public function testCreateNormalizesPhoneAndPostcode()
+    {
+        $body = ['ok' => true];
+        [$client, $getHistory] = $this->makeClientWithHistoryPair([new \GuzzleHttp\Psr7\Response(200, [], json_encode($body))]);
+
+        $this->assertSame($body, $client->recipients->create('Alice', 'Smith', '1 Test St', '', '', 'London', ' nw1 6xe ', 'GB', 'alice@example.com', '+44 (7911) 123456', 'ref', 0, 'update', 'standard'));
+
+        $history = $getHistory();
+        $this->assertCount(1, $history);
+        $req = $history[0]['request'];
+        $this->assertSame('POST', $req->getMethod());
+        $bodyString = (string) $req->getBody();
+        parse_str($bodyString, $parsed);
+        $this->assertArrayHasKey('postcode', $parsed);
+        $this->assertSame('NW1 6XE', $parsed['postcode']);
+        $this->assertArrayHasKey('phone_number', $parsed);
+        $this->assertSame('+447911123456', $parsed['phone_number']);
     }
 }

@@ -37,21 +37,50 @@ class Recipients extends Resource
      * @throws \Phannp\Exceptions\ApiException on HTTP or API errors
      */
     public function create(
-        string $firstname,
-        string $lastname,
-        string $address1,
-        string $address2,
-        string $address3,
-        string $city,
-        string $postcode,
-        string $country,
-        string $email,
-        string $phone_number,
-        string $ref_id,
+        ?string $firstname,
+        ?string $lastname,
+        ?string $address1,
+        ?string $address2,
+        ?string $address3,
+        ?string $city,
+        ?string $postcode,
+        ?string $country,
+        ?string $email,
+        ?string $phone_number,
+        ?string $ref_id,
         int $group_id,
-        string $on_duplicate,
-        string $test_level
+        ?string $on_duplicate,
+        ?string $test_level
     ): array {
+        // Client-side validation: ensure required string fields are present
+        if (!is_string($firstname) || trim($firstname) === '') {
+            throw new \InvalidArgumentException('firstname is required and must be a non-empty string');
+        }
+
+        // Validate email if provided
+        if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('email must be a valid email address');
+        }
+
+        // Validate country using allowed codes helper
+        if ($country !== null && !\Phannp\Utilities\Countries::isValid($country)) {
+            throw new \InvalidArgumentException('country must be a valid ISO 3166-1 alpha-2 code (e.g. GB, US)');
+        }
+
+        // Normalize and validate phone number: remove common separators and ensure digits (optionally leading +)
+        if ($phone_number !== null) {
+            $normalizedPhone = preg_replace('/[\s\-()\.]/', '', $phone_number);
+            if (!preg_match('/^\+?\d+$/', $normalizedPhone)) {
+                throw new \InvalidArgumentException('phone_number must contain only digits and an optional leading +');
+            }
+            $phone_number = $normalizedPhone;
+        }
+
+        // Normalize postcode: uppercase and trim
+        if ($postcode !== null) {
+            $postcode = strtoupper(trim(preg_replace('/\s+/', ' ', $postcode)));
+        }
+
         return $this->client->post('recipients/new', [
             'firstname'     => $firstname,
             'lastname'      => $lastname,

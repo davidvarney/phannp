@@ -32,6 +32,15 @@ class Reporting extends Resource
         string $returned = '',
         string $cancelled = ''
     ): array {
+        // Validate date format if provided
+        $dateRegex = '/^\d{4}-\d{2}-\d{2}$/';
+        if ($startdate !== null && !preg_match($dateRegex, $startdate)) {
+            throw new \InvalidArgumentException('startdate must be in YYYY-MM-DD format');
+        }
+        if ($enddate !== null && !preg_match($dateRegex, $enddate)) {
+            throw new \InvalidArgumentException('enddate must be in YYYY-MM-DD format');
+        }
+
         $startdate = $startdate ?? date('Y-m-d', strtotime('-1 month'));
         $enddate = $enddate ?? date('Y-m-d');
 

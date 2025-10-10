@@ -16,8 +16,7 @@ class SelectionsTest extends TestCase
             new Response(200, [], json_encode($body)),
         ]);
 
-        $this->assertSame($body, $client->selections->create(['a' => 1]));
-        $this->assertSame($body, $client->selections->get(1));
-        $this->assertSame($body, $client->selections->list());
+    // Selections::new(groupId, name, filters)
+    $this->assertSame($body, $client->selections->new(1, 'Active', 'total_spent:::more_than:::300'));
     }
 }

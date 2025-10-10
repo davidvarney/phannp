@@ -66,6 +66,30 @@ class TestCase extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Convenience: return parsed form params for a request (for form_params bodies).
+     * @param RequestInterface $request
+     * @return array<string,mixed>
+     */
+    protected function getFormParams(RequestInterface $request): array
+    {
+        $body = (string) $request->getBody();
+        parse_str($body, $params);
+        return $params;
+    }
+
+    /**
+     * Convenience wrapper that returns [Client, History] and accepts a list of responses.
+     * Kept for readability in tests that need many responses.
+     * @param array $responses
+     * @param array $options
+     * @return array [Client, callable]
+     */
+    protected function makeClientWithHistoryAndResponses(array $responses, array $options = []): array
+    {
+        return $this->makeClientWithHistoryPair($responses, $options);
+    }
+
+    /**
      * Parse a multipart/form-data request body into an array of parts.
      * Returns an array of parts where each part is an associative array with
      * keys: name, headers (assoc), and body (string).
