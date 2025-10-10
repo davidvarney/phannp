@@ -10,6 +10,53 @@ Install via Composer:
 composer require davidvarney/phannp
 ```
 
+## Developer & testing guide (short)
+
+If you're contributing or running tests locally, here's a short guide.
+
+- Run the full test-suite:
+
+```bash
+composer install
+./vendor/bin/phpunit --configuration phpunit.xml.dist
+```
+
+- Run a single test file for faster feedback:
+
+```bash
+./vendor/bin/phpunit tests/Resources/ToolsTest.php
+```
+
+- Use `tests/TestCase.php` helpers:
+    - `makeClient()` — returns a `Phannp\\Client` configured with a Guzzle MockHandler preloaded with responses.
+    - `makeClientWithHistoryPair()` — returns `[$client, $getHistory]` where `$getHistory()` returns recorded request history (useful to assert outgoing request shapes).
+    - `parseMultipartBody()` / `getMultipartParts()` — test helpers to assert multipart uploads.
+
+- Error assertion helpers:
+    - `callAndCatchApiException()` — run a callable that should raise `ApiException` and return the caught exception for assertions.
+    - `assertApiErrorJsonHasPath()` — assert nested JSON error paths in `ApiException::getResponseJson()`.
+
+### Local commit note
+
+Most recent local commit message on this branch:
+
+```
+:recycle: Refactors the Tools resource
+
+On branch refactor-resources
+ Changes to be committed:
+                modified:   src/Resources/Tools.php
+                modified:   tests/Resources/ToolsTest.php
+```
+
+Discussion: this commit tightens the `Tools` resource API and test coverage:
+
+- `Tools::pdfMerge()` now validates input client-side (requires a non-empty array of strings).
+- Tests in `tests/Resources/ToolsTest.php` were updated to assert query param encoding, edge cases and history-based request assertions.
+
+If you pushed this branch, include the commit hash in the changelog entry and consider mentioning the validation behavior in the public README examples.
+
+
 ## Requirements
 
 - PHP 7.4 or higher
