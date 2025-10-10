@@ -33,40 +33,87 @@ $client = new Client('your-api-key-here');
 
 ```php
 // Create a postcard
-$postcard = $client->postcards->create([
-    'recipient' => 123,
-    'template' => 456,
-    'size' => 'A6',
-]);
+// Note: the SDK's Postcards resource currently expects a size string
+// (e.g. '4x6', '6x9') and will accept additional params in future.
+$postcard = $client->postcards->create('4x6');
 
 // Get a postcard
 $postcard = $client->postcards->get(789);
 
-// List postcards
-$postcards = $client->postcards->list(['limit' => 10]);
-
 // Cancel a postcard
 $result = $client->postcards->cancel(789);
+```
+
+Postcards::create parameters
+
+- size (string) — postcard size, e.g. '4x6', '6x9', '6x11'.
+- (future) recipient/template/file — the SDK may accept additional params; currently use `create('size')`.
+
+Example using a template (future-proof):
+
+```php
+// If you have a template id and recipient id available, the create call
+// will eventually accept a combined payload. For now you can pass a size
+// and send the template/recipient via your campaign or direct create call
+// when the SDK supports it.
+$postcard = $client->postcards->create('4x6');
 ```
 
 ### Letters
 
 ```php
 // Create a letter
+// The Letters resource supports both creating a merged letter (pass a
+// recipient id or array) or posting a pre-merged PDF using post().
+// Example: create with a recipient array (mail-merge)
 $letter = $client->letters->create([
-    'recipient' => 123,
-    'template' => 456,
-    'size' => 'A4',
+    'firstname' => 'Jane',
+    'lastname'  => 'Doe',
+    'address1'  => '1 Example St',
+    'city'      => 'London',
+    'postcode'  => 'EC1A 1BB',
+    'country'   => 'GB',
 ]);
+
+// Or: post a pre-merged PDF (country required)
+$letter = $client->letters->post('GB', false, 'https://example.com/file.pdf');
 
 // Get a letter
 $letter = $client->letters->get(789);
 
-// List letters
-$letters = $client->letters->list(['limit' => 10]);
-
 // Cancel a letter
 $result = $client->letters->cancel(789);
+```
+
+Letters::create parameters
+
+- recipient (mixed) — mandatory. Either an existing recipient ID (int/string) or an associative array defining a new recipient (keys like firstname, lastname, address1, city, postcode, country).
+- test (bool) — optional. Generate a sample PDF without dispatch when true.
+- template (mixed) — optional. Template ID to use for mail-merge.
+- file (mixed) — optional. Instead of template/pages, you can pass a local file path, resource (fopen), or a URL to a PDF/DOC file.
+- duplex (bool) — optional. Defaults to true; set false to print only on the front.
+- clearzone (bool) — optional. Defaults to false; overlay clear zones with white when true.
+- post_unverified (bool) — optional. Defaults to true; set to false to prevent posting unverified addresses.
+- tags (string) — optional. Comma-separated tags.
+- addons (string) — optional. Comma-separated addon codes, e.g. 'FIRST_CLASS'.
+
+Example — create using a template id and recipient id:
+
+```php
+// Create with an existing recipient and a template id
+$letter = $client->letters->create(123, false, 456);
+```
+
+Example — post a pre-merged file (resource or URL):
+
+```php
+// Pass a URL
+$letter = $client->letters->post('GB', false, 'https://example.com/file.pdf');
+
+// Or pass a local resource
+$fp = fopen('/path/to/letter.pdf', 'r');
+$letter = $client->letters->post('GB', false, $fp);
+fclose($fp);
 ```
 
 ### Recipients
@@ -149,6 +196,59 @@ $files = $client->files->list(['limit' => 10]);
 
 // Delete a file
 $result = $client->files->delete(123);
+```
+
+Multipart uploads (files)
+
+The SDK supports uploading files either by file path, by resource (e.g. fopen),
+or by URL. In tests we use Guzzle's history middleware to inspect outgoing
+requests and assert multipart bodies.
+
+Upload examples:
+
+```php
+// Upload via file path (SDK will detect and send multipart)
+$file = $client->files->upload(['file' => '/path/to/file.pdf']);
+
+// Upload via resource
+$fp = fopen('/path/to/file.pdf', 'r');
+$file = $client->files->upload(['file' => $fp]);
+fclose($fp);
+
+// Upload via URL (the SDK will forward the URL string)
+$file = $client->files->upload(['file' => 'https://example.com/file.pdf']);
+```
+
+Asserting multipart in tests
+
+Use the test helper `makeClientWithHistoryPair()` to capture outgoing requests and
+`parseMultipartBody()` / `getMultipartParts()` to inspect multipart parts.
+
+```php
+[$client, $getHistory] = $this->makeClientWithHistoryPair([
+    new \GuzzleHttp\Psr7\Response(200, [], json_encode(['ok' => true])),
+]);
+
+$client->files->upload(['file' => fopen('/tmp/a.pdf', 'r')]);
+
+$history = $getHistory();
+$req = $history[0]['request'];
+
+$this->assertStringContainsString('multipart/form-data', $req->getHeaderLine('Content-Type'));
+$parts = $this->parseMultipartBody($req);
+$this->assertNotEmpty($parts);
+
+// Find the file part by name and assert filename/content
+$filePart = null;
+foreach ($parts as $p) {
+    if ($p['name'] === 'file') {
+        $filePart = $p;
+        break;
+    }
+}
+
+$this->assertNotNull($filePart);
+$this->assertStringContainsString('%PDF', $filePart['body']);
 ```
 
 ### Reporting
@@ -386,6 +486,15 @@ try {
     echo 'API Error: ' . $e->getMessage();
 }
 ```
+
+## Changelog (recent)
+
+- 2025-10-09: Refactor of Resources API
+    - `Letters::create()` now accepts a `recipient` parameter (id or array) and supports `template`, `file` (path/resource/URL), `duplex`, `clearzone`, and other flags.
+    - `Letters::post()` added for posting pre-merged PDF/DOC files (accepts country and file resource/URL).
+    - `Postcards::create()` simplified to accept a `size` string (e.g. '4x6'); other postcard parameters will be added as SDK support evolves.
+    - Tests and README updated to reflect these API changes.
+
 
 More detailed error handling
 
