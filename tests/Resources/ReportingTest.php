@@ -29,8 +29,8 @@ class ReportingTest extends TestCase
         $this->assertStringContainsString('reporting/summary/2025-01-01/2025-01-31', (string) $req1->getUri());
 
         // Parse query to assert api key (auth) and default params are present
-        parse_str($req1->getUri()->getQuery(), $q1);
-        $this->assertArrayHasKey('auth', $q1);
+    parse_str($req1->getUri()->getQuery(), $q1);
+    $this->assertArrayHasKey('api_key', $q1);
         // The summary filters should be present and set to our string flags
         $this->assertSame('1', $q1['received']);
         $this->assertSame('1', $q1['producing']);
@@ -44,8 +44,8 @@ class ReportingTest extends TestCase
         $req2 = $history[1]['request'];
         $this->assertSame('GET', $req2->getMethod());
         $this->assertStringContainsString('reporting/list/2025-01-01/2025-01-31/delivered/campaign:summer', (string) $req2->getUri());
-        parse_str($req2->getUri()->getQuery(), $q2);
-        $this->assertArrayHasKey('auth', $q2);
+    parse_str($req2->getUri()->getQuery(), $q2);
+    $this->assertArrayHasKey('api_key', $q2);
     }
 
     public function testSummaryThrowsOnApiError()

@@ -45,6 +45,9 @@ class FilesTest extends TestCase
         // Ensure our folder_id is present in the request body (form-encoded)
         $this->assertStringContainsString('folder_id', $bodyStr);
         $this->assertStringContainsString('42', $bodyStr);
+        parse_str($request->getUri()->getQuery(), $q);
+        $this->assertArrayHasKey('api_key', $q);
+        $this->assertSame('test_api_key', $q['api_key']);
     }
 
     public function testUploadApiError()
@@ -106,6 +109,10 @@ class FilesTest extends TestCase
             }
 
             $this->assertTrue($found, 'Expected multipart part named "file" not found');
+            // The API key should still be appended to the request URI even for multipart
+                parse_str($request->getUri()->getQuery(), $q);
+                $this->assertArrayHasKey('api_key', $q);
+                $this->assertSame('test_api_key', $q['api_key']);
         } finally {
             // cleanup
             @unlink($tmp);
@@ -150,6 +157,10 @@ class FilesTest extends TestCase
             }
 
             $this->assertTrue($found, 'Expected multipart part named "file" not found');
+            // The API key should still be appended to the request URI even for resource uploads
+                parse_str($request->getUri()->getQuery(), $q);
+                $this->assertArrayHasKey('api_key', $q);
+                $this->assertSame('test_api_key', $q['api_key']);
         } finally {
             @fclose($f);
             @unlink($tmp);

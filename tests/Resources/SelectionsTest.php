@@ -21,7 +21,11 @@ class SelectionsTest extends TestCase
         $this->assertCount(1, $history);
         $req = $history[0]['request'];
         $this->assertSame('GET', $req->getMethod());
-        $this->assertStringContainsString('selections/new', (string) $req->getUri());
+    $this->assertStringContainsString('selections/new', (string) $req->getUri());
+    // Ensure api_key is present in the query
+    parse_str($req->getUri()->getQuery(), $q);
+    $this->assertArrayHasKey('api_key', $q);
+    $this->assertSame('test_api_key', $q['api_key']);
     }
 
     public function testNewApiErrorProvidesJson()
