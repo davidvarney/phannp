@@ -29,7 +29,10 @@ class EventsTest extends TestCase
         $this->assertStringContainsString('conversion=1', $bodyString);
         $this->assertStringContainsString('data=%7B%22sku%22%3A%22X%22%7D', $bodyString);
         $this->assertStringContainsString('ref=ref-1', $bodyString);
-        // API key is injected as auth[0]
-        $this->assertStringContainsString('auth%5B0%5D=test_api_key', $bodyString);
+        // API key is appended to the endpoint as a query parameter
+    $query = $request->getUri()->getQuery();
+    parse_str($query, $q);
+    $this->assertArrayHasKey('api_key', $q);
+    $this->assertSame('test_api_key', $q['api_key']);
     }
 }

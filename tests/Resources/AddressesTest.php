@@ -82,12 +82,13 @@ class AddressesTest extends TestCase
         // The Client uses form_params for POSTs; Guzzle serializes as application/x-www-form-urlencoded
         $bodyString = (string) $request->getBody();
 
-    // Confirm that country=GB and state=NY are present in the sent body
-    $this->assertStringContainsString('country=GB', $bodyString);
-    $this->assertStringContainsString('state=NY', $bodyString);
+        // Confirm that country=GB and state=NY are present in the sent body
+        $this->assertStringContainsString('country=GB', $bodyString);
+        $this->assertStringContainsString('state=NY', $bodyString);
 
-    // API key should be present in the outgoing form payload (auth[0] encoded)
-    $this->assertStringContainsString('auth%5B0%5D=test_api_key', $bodyString);
+        // API key should be present in the request query string (client appends api_key to endpoint)
+        $query = $request->getUri()->getQuery();
+        $this->assertStringContainsString('api_key=test_api_key', $query);
     }
 
     public function testValidateRejectsUnknownCountry()

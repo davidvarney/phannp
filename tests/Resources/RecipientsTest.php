@@ -40,7 +40,7 @@ class RecipientsTest extends TestCase
     // The Recipients::list uses path + query for group and pagination via query params
     $this->assertStringContainsString('recipients/list', (string) $req->getUri());
     parse_str($req->getUri()->getQuery(), $q);
-    $this->assertArrayHasKey('auth', $q);
+    $this->assertArrayHasKey('api_key', $q);
     $this->assertSame('0', $q['group_id']);
     $this->assertSame('0', $q['offset']);
     $this->assertSame('10', $q['limit']);

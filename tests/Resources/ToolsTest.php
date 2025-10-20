@@ -33,6 +33,9 @@ class ToolsTest extends TestCase
         $this->assertArrayHasKey('size', $q1);
         $this->assertSame('https://example.com', $q1['data']);
         $this->assertSame('300', $q1['size']);
+    parse_str($req1->getUri()->getQuery(), $q1);
+    $this->assertArrayHasKey('api_key', $q1);
+    $this->assertSame('test_api_key', $q1['api_key']);
 
         // pdfMerge: second request should include files[] entries
         $req2 = $history[1]['request'];
@@ -41,10 +44,16 @@ class ToolsTest extends TestCase
         $this->assertArrayHasKey('files', $q2);
         $this->assertIsArray($q2['files']);
         $this->assertSame(['https://example.com/a.pdf', 'https://example.com/b.pdf'], $q2['files']);
+    parse_str($req2->getUri()->getQuery(), $q2);
+    $this->assertArrayHasKey('api_key', $q2);
+    $this->assertSame('test_api_key', $q2['api_key']);
 
         // getTemplates: third should call templates/list
         $req3 = $history[2]['request'];
         $this->assertStringContainsString('templates/list', (string) $req3->getUri());
+    parse_str($req3->getUri()->getQuery(), $q3);
+    $this->assertArrayHasKey('api_key', $q3);
+    $this->assertSame('test_api_key', $q3['api_key']);
     }
 
     public function testPdfMergeEdgeCases()

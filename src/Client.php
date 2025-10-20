@@ -211,27 +211,65 @@ class Client
     /**
      * Make a POST request to the specified endpoint with optional data.
      * Returns the decoded JSON response as an associative array.
-     * @throws ApiException on HTTP or API errors
+    *
+    * Implementation notes:
+    * - Any trailing '/' in the provided endpoint will be trimmed.
+    * - If the endpoint already contains a query string, those params are preserved
+    *   and merged with the client's `api_key` (the client's api_key takes precedence).
+    * - The API key is sent as a query parameter (`api_key`) via Guzzle's 'query' option.
+    *
+    * @throws ApiException on HTTP or API errors
      */
     public function post(string $endpoint, array $data = []): array
     {
-        $dataWithKey = $this->addApiKey($data);
-        $options = $this->buildBodyOptions($dataWithKey);
+        // Normalize endpoint path and existing query
+        $qPos = strpos($endpoint, '?');
+        if ($qPos !== false) {
+            $path = rtrim(substr($endpoint, 0, $qPos), '/');
+            parse_str(substr($endpoint, $qPos + 1), $existingQuery);
+        } else {
+            $path = rtrim($endpoint, '/');
+            $existingQuery = [];
+        }
 
-        return $this->request('POST', $endpoint, $options);
+        // Ensure api_key is present in query params
+        $query = array_merge($existingQuery, ['api_key' => $this->apiKey]);
+
+        $options = $this->buildBodyOptions($data);
+        $options['query'] = $query;
+
+        return $this->request('POST', $path, $options);
     }
 
     /**
      * Make a PUT request to the specified endpoint with optional data.
      * Returns the decoded JSON response as an associative array.
-     * @throws ApiException on HTTP or API errors
+    *
+    * Implementation notes:
+    * - Any trailing '/' in the provided endpoint will be trimmed.
+    * - If the endpoint already contains a query string, those params are preserved
+    *   and merged with the client's `api_key` (the client's api_key takes precedence).
+    * - The API key is sent as a query parameter (`api_key`) via Guzzle's 'query' option.
+    *
+    * @throws ApiException on HTTP or API errors
      */
     public function put(string $endpoint, array $data = []): array
     {
-        $dataWithKey = $this->addApiKey($data);
-        $options = $this->buildBodyOptions($dataWithKey);
+        $qPos = strpos($endpoint, '?');
+        if ($qPos !== false) {
+            $path = rtrim(substr($endpoint, 0, $qPos), '/');
+            parse_str(substr($endpoint, $qPos + 1), $existingQuery);
+        } else {
+            $path = rtrim($endpoint, '/');
+            $existingQuery = [];
+        }
 
-        return $this->request('PUT', $endpoint, $options);
+        $query = array_merge($existingQuery, ['api_key' => $this->apiKey]);
+
+        $options = $this->buildBodyOptions($data);
+        $options['query'] = $query;
+
+        return $this->request('PUT', $path, $options);
     }
 
     /**
@@ -294,12 +332,27 @@ class Client
     /**
      * Make a DELETE request to the specified endpoint with optional query parameters.
      * Returns the decoded JSON response as an associative array.
-     * @throws ApiException on HTTP or API errors
+    *
+    * Implementation notes:
+    * - The client's api_key will be merged into the provided $params and sent
+    *   via Guzzle's 'query' option. This ensures the api_key is always present
+    *   even when $params is an empty array.
+    *
+    * @throws ApiException on HTTP or API errors
      */
     public function delete(string $endpoint, array $params = []): array
     {
-        return $this->request('DELETE', $endpoint, ['query' => $this->addApiKey($params)]);
+        // Merge api_key into the query parameters to ensure it's present even when
+        // $params is empty (Guzzle's 'query' option will be used to build the final URI).
+        $paramsWithKey = array_merge($params, ['api_key' => $this->apiKey]);
+
+        // Trim trailing slash from endpoint path before passing to Guzzle
+        $trimmed = rtrim($endpoint, '/');
+        return $this->request('DELETE', $trimmed, ['query' => $paramsWithKey]);
     }
+
+    // appendApiKeyToEndpoint() removed — api_key is now consistently provided via
+    // the 'query' option for POST/PUT/DELETE and via addApiKey() for GET.
 
     /**
      * Make an HTTP request using the specified method, endpoint, and options.
@@ -339,6 +392,7 @@ class Client
      */
     private function addApiKey(array $data): array
     {
-        return array_merge(['auth' => [$this->apiKey, '']], $data);
+        // Ensure the API key parameter is named 'api_key' per the API contract.
+        return array_merge(['api_key' => $this->apiKey], $data);
     }
 }

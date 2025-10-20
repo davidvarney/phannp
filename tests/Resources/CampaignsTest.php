@@ -44,7 +44,11 @@ class CampaignsTest extends TestCase
 
         $query = $request->getUri()->getQuery();
         $this->assertStringContainsString('id=123', $query);
-    $this->assertStringContainsString('auth%5B0%5D=test_api_key', $query);
+        parse_str($query, $q);
+        $this->assertArrayHasKey('id', $q);
+        $this->assertSame('123', $q['id']);
+        $this->assertArrayHasKey('api_key', $q);
+        $this->assertSame('test_api_key', $q['api_key']);
     }
 
     public function testCost()
@@ -64,7 +68,11 @@ class CampaignsTest extends TestCase
 
         $query = $request->getUri()->getQuery();
         $this->assertStringContainsString('id=321', $query);
-    $this->assertStringContainsString('auth%5B0%5D=test_api_key', $query);
+        parse_str($query, $q);
+        $this->assertArrayHasKey('id', $q);
+        $this->assertSame('321', $q['id']);
+        $this->assertArrayHasKey('api_key', $q);
+        $this->assertSame('test_api_key', $q['api_key']);
     }
 
     public function testApprove()
@@ -84,7 +92,10 @@ class CampaignsTest extends TestCase
         // Body should be form-encoded including api_key and id
         $bodyString = (string) $request->getBody();
         $this->assertStringContainsString('id=42', $bodyString);
-    $this->assertStringContainsString('auth%5B0%5D=test_api_key', $bodyString);
+
+        // API key is appended to the endpoint as a query parameter
+        $query = $request->getUri()->getQuery();
+        $this->assertStringContainsString('api_key=test_api_key', $query);
 
         // Content-Type should indicate form-encoded for non-multipart requests
         $this->assertTrue($request->hasHeader('Content-Type'));
@@ -163,7 +174,13 @@ class CampaignsTest extends TestCase
         $query = $request->getUri()->getQuery();
         $this->assertStringContainsString('start=2025-10-01', $query);
         $this->assertStringContainsString('end=2025-10-31', $query);
-    $this->assertStringContainsString('auth%5B0%5D=test_api_key', $query);
+        parse_str($query, $q);
+        $this->assertArrayHasKey('start', $q);
+        $this->assertSame('2025-10-01', $q['start']);
+        $this->assertArrayHasKey('end', $q);
+        $this->assertSame('2025-10-31', $q['end']);
+        $this->assertArrayHasKey('api_key', $q);
+        $this->assertSame('test_api_key', $q['api_key']);
     }
 
     public function testAvailableDatesThrowsApiExceptionOn4xx()
@@ -211,7 +228,7 @@ class CampaignsTest extends TestCase
         $query = $request->getUri()->getQuery();
         $this->assertStringContainsString('start=2025-10-01', $query);
         $this->assertStringContainsString('end=2025-10-31', $query);
-    $this->assertStringContainsString('auth%5B0%5D=test_api_key', $query);
+    $this->assertStringContainsString('api_key=test_api_key', $query);
     }
 
     public function testAvailableDatesWithStartOnlyDefaultsEnd()
@@ -236,9 +253,15 @@ class CampaignsTest extends TestCase
         $query = $request->getUri()->getQuery();
         // start should be the provided value
         $this->assertStringContainsString('start=2025-10-05', $query);
-    // end is computed from the provided start date (start + 30 days)
-    $this->assertStringContainsString('end=2025-11-04', $query);
-    $this->assertStringContainsString('auth%5B0%5D=test_api_key', $query);
+        // end is computed from the provided start date (start + 30 days)
+        $this->assertStringContainsString('end=2025-11-04', $query);
+        parse_str($query, $q);
+        $this->assertArrayHasKey('start', $q);
+        $this->assertSame('2025-10-05', $q['start']);
+        $this->assertArrayHasKey('end', $q);
+        $this->assertSame('2025-11-04', $q['end']);
+        $this->assertArrayHasKey('api_key', $q);
+        $this->assertSame('test_api_key', $q['api_key']);
     }
 
     public function testAvailableDatesWithEndOnlyDefaultsStart()
@@ -262,7 +285,13 @@ class CampaignsTest extends TestCase
         // start should be end - 30 days
         $this->assertStringContainsString('start=2025-10-01', $query);
         $this->assertStringContainsString('end=2025-10-31', $query);
-    $this->assertStringContainsString('auth%5B0%5D=test_api_key', $query);
+        parse_str($query, $q);
+        $this->assertArrayHasKey('start', $q);
+        $this->assertSame('2025-10-01', $q['start']);
+        $this->assertArrayHasKey('end', $q);
+        $this->assertSame('2025-10-31', $q['end']);
+        $this->assertArrayHasKey('api_key', $q);
+        $this->assertSame('test_api_key', $q['api_key']);
     }
 
     public function testAvailableDatesRejectsInvalidStart()
@@ -302,7 +331,11 @@ class CampaignsTest extends TestCase
         $this->assertStringContainsString('send_date=2025-10-20', $bodyString);
         $this->assertStringContainsString('next_available_date=1', $bodyString);
         $this->assertStringContainsString('use_balance=0', $bodyString);
-    $this->assertStringContainsString('auth%5B0%5D=test_api_key', $bodyString);
+        // API key should be in the request query (appended to endpoint)
+        $query = $request->getUri()->getQuery();
+        parse_str($query, $q);
+        $this->assertArrayHasKey('api_key', $q);
+        $this->assertSame('test_api_key', $q['api_key']);
 
         $this->assertTrue($request->hasHeader('Content-Type'));
         $ct = $request->getHeaderLine('Content-Type');
@@ -351,14 +384,14 @@ class CampaignsTest extends TestCase
         $body = ['ok' => true];
 
         // Create temp files for file, front, back
-    // Use filenames with extensions so the parser can expose them
-    $tmpFile = tempnam(sys_get_temp_dir(), 'phannp_campaign_') . '.pdf';
-    $tmpFront = tempnam(sys_get_temp_dir(), 'phannp_campaign_') . '.jpg';
-    $tmpBack = tempnam(sys_get_temp_dir(), 'phannp_campaign_') . '.jpg';
+        // Use filenames with extensions so the parser can expose them
+        $tmpFile = tempnam(sys_get_temp_dir(), 'phannp_campaign_') . '.pdf';
+        $tmpFront = tempnam(sys_get_temp_dir(), 'phannp_campaign_') . '.jpg';
+        $tmpBack = tempnam(sys_get_temp_dir(), 'phannp_campaign_') . '.jpg';
 
-    file_put_contents($tmpFile, 'campaign-file');
-    file_put_contents($tmpFront, 'campaign-front');
-    file_put_contents($tmpBack, 'campaign-back');
+        file_put_contents($tmpFile, 'campaign-file');
+        file_put_contents($tmpFront, 'campaign-front');
+        file_put_contents($tmpBack, 'campaign-back');
 
         [$client, $getHistory] = $this->makeClientWithHistoryPair([
             new \GuzzleHttp\Psr7\Response(200, [], json_encode($body)),
