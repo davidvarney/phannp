@@ -80,9 +80,10 @@ $client = new Client('your-api-key-here');
 
 ```php
 // Create a postcard
-// Note: the SDK's Postcards resource currently expects a size string
-// (e.g. '4x6', '6x9') and will accept additional params in future.
-$postcard = $client->postcards->create('4x6');
+// Note: the SDK's Postcards resource expects an array of parameters and
+// requires a 'size' key (e.g. ['size' => '4x6']). Additional params may be
+// supported in future.
+$postcard = $client->postcards->create(['size' => '4x6']);
 
 // Get a postcard
 $postcard = $client->postcards->get(789);
@@ -93,17 +94,16 @@ $result = $client->postcards->cancel(789);
 
 Postcards::create parameters
 
-- size (string) — postcard size, e.g. '4x6', '6x9', '6x11'.
-- (future) recipient/template/file — the SDK may accept additional params; currently use `create('size')`.
+- size (string) — postcard size, e.g. '4x6', '6x9', '6x11'. Must be provided in the parameters array: `['size' => '4x6']`.
+- (future) recipient/template/file — the SDK may accept additional params; currently pass required parameters as an associative array to `create()`.
 
 Example using a template (future-proof):
 
 ```php
 // If you have a template id and recipient id available, the create call
-// will eventually accept a combined payload. For now you can pass a size
-// and send the template/recipient via your campaign or direct create call
-// when the SDK supports it.
-$postcard = $client->postcards->create('4x6');
+// will eventually accept a combined payload. For now pass parameters as an
+// associative array and include 'size' at minimum.
+$postcard = $client->postcards->create(['size' => '4x6']);
 ```
 
 ### Letters
@@ -613,7 +613,7 @@ try {
 - 2025-10-09: Refactor of Resources API
     - `Letters::create()` now accepts a `recipient` parameter (id or array) and supports `template`, `file` (path/resource/URL), `duplex`, `clearzone`, and other flags.
     - `Letters::post()` added for posting pre-merged PDF/DOC files (accepts country and file resource/URL).
-    - `Postcards::create()` simplified to accept a `size` string (e.g. '4x6'); other postcard parameters will be added as SDK support evolves.
+    - `Postcards::create()` now requires an associative array of parameters and must include a `size` key (e.g. `['size' => '4x6']`). Other postcard parameters may be added in future SDK releases.
     - Tests and README updated to reflect these API changes.
 
 

@@ -16,8 +16,8 @@ class PostcardsTest extends TestCase
             new Response(200, [], json_encode($body)),
         ]);
 
-        // create expects a postcard size string
-        $this->assertSame($body, $client->postcards->create('4x6'));
+    // create expects an array with a 'size' key
+    $this->assertSame($body, $client->postcards->create(['size' => '4x6']));
         $this->assertSame($body, $client->postcards->get(123));
         // list() was removed from the resource
         $this->assertSame($body, $client->postcards->cancel(123));
